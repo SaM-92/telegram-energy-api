@@ -11,13 +11,14 @@ from telegram.ext import (
     ConversationHandler,
     CallbackContext,
 )
-from subs.data_loader import (
-    process_data_for_analysis,
-    process_uploaded_file,
-    convert_time,
-    process_time_resolution_and_duplicates,
-    display_column_statistics,
-)
+
+# from subs.data_loader import (
+#     process_data_for_analysis,
+#     process_uploaded_file,
+#     convert_time,
+#     process_time_resolution_and_duplicates,
+#     display_column_statistics,
+# )
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -234,7 +235,7 @@ def main() -> None:
     This function creates an Application instance, sets up the conversation handlers,
     and starts the bot to listen for incoming messages and commands.
     """
-    token = os.environ.get("TELEGRAM_TOKEN")
+    token = os.environ.get("Telegram_energy_api")
     # Create the Application instance
     application = Application.builder().token(token).build()
 
