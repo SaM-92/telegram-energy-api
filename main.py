@@ -216,7 +216,7 @@ async def energy_api_func(update: Update, context: CallbackContext):
 
     # Store the selected column name in the context's user_data dictionary.
     # This is a way to persist user-specific data across different states of the conversation.
-    # The key 'selected_time_column' is used to store and later retrieve the user's choice.
+    # The key 'selected_option' is used to store and later retrieve the user's choice.
     context.user_data["selected_option"] = user_selected_option
 
     # Store the selected time column
@@ -231,12 +231,19 @@ async def energy_api_func(update: Update, context: CallbackContext):
     # Retrieve the selected time column name from user_data.
     # This should be the same as 'user_selected_column', and it's the column name
     # chosen by the user for further data processing.
-    selected_time_column = user_data.get("selected_option")
+    selected_option_user = user_data.get("selected_option")
 
     # Inform the user that the time column has been selected
     await update.message.reply_text(
-        f"I understand that you have selected: {selected_time_column}"
+        f"I understand that you have selected: {selected_option_user}"
     )
+
+    if selected_option_user == "Carbon intensity":
+        sadas
+    else:
+        await update.message.reply_text(
+            f"Sorry {user_first_name}! 🤖 We are still working on this feature. Please try again later."
+        )
 
     # End the conversation
     next_state = user_data.get("next_state", ConversationHandler.END)
