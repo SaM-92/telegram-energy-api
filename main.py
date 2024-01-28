@@ -25,7 +25,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Define conversation states
-SELECT_COLUMN = 0
+SELECT_OPTION = 0
 TIME_COLUMN_SELECTED = 1
 
 
@@ -189,6 +189,60 @@ async def doc_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return ConversationHandler.END
 
 
+async def energy_api_func(update: Update, context: CallbackContext):
+    """
+    Handles the processing and resampling of uploaded time series data.
+
+    This function is triggered when the user selects a time column for the uploaded data.
+    It performs data preprocessing, including handling missing values and resampling the data
+    to an hourly resolution. The function also sends back the processed data to the user along with
+    some basic statistics.
+
+    Args:
+        update (telegram.Update): The incoming update from the user.
+        context (telegram.ext.CallbackContext): The context for the conversation.
+
+    Returns:
+        int: The next state in the conversation flow.
+    """
+    user_first_name = update.message.from_user.first_name
+
+    await update.message.reply_text(
+        f"""Thank you {user_first_name}! 🤖 We are now processing your request and we will get back to you shortly."""
+    )
+    # Retrieve the text of the message sent by the user. This is assumed to be the column name
+    # the user has selected.
+    user_selected_option = update.message.text
+
+    # Store the selected column name in the context's user_data dictionary.
+    # This is a way to persist user-specific data across different states of the conversation.
+    # The key 'selected_time_column' is used to store and later retrieve the user's choice.
+    context.user_data["selected_option"] = user_selected_option
+
+    # Store the selected time column
+    # Retrieve the user_data dictionary from the context.
+    # This dictionary holds data specific to the current user and can be accessed across
+    # different states in the conversation.
+    user_data = context.user_data
+
+    # Retrieve the DataFrame stored in user_data. The key 'data_frame' should have been set
+    # in a previous step of the conversation where the user uploaded their data.
+
+    # Retrieve the selected time column name from user_data.
+    # This should be the same as 'user_selected_column', and it's the column name
+    # chosen by the user for further data processing.
+    selected_time_column = user_data.get("selected_option")
+
+    # Inform the user that the time column has been selected
+    await update.message.reply_text(
+        f"I understand that you have selected: {selected_time_column}"
+    )
+
+    # End the conversation
+    next_state = user_data.get("next_state", ConversationHandler.END)
+    return next_state
+
+
 async def energy_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_first_name = update.message.from_user.first_name
     options = [
@@ -200,11 +254,14 @@ async def energy_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[option] for option in options]
     reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
 
-    # Send the list of column names and instruct the user to select one
+    # send the list of options and ask the user to select one
     await update.message.reply_text(
-        f" Hey {user_first_name}, can you please let me know on which of the following categories you are interested to get info?",
+        f"Hello {user_first_name}! I'm here to help you with energy insights. Which category would you like more information about?",
         reply_markup=reply_markup,
     )
+    # Set the conversation state to SELECT_COLUMN
+    context.user_data["next_state"] = SELECT_OPTION
+    return SELECT_OPTION
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -257,19 +314,17 @@ def main() -> None:
     # Create the Application instance
     application = Application.builder().token(token).build()
 
-    SELECT_COLUMN = 0
+    SELECT_OPTION = 0
     # Create a ConversationHandler for handling the file upload and column selection
     conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler("start", start),
             CommandHandler("energy_status", energy_status),
-            MessageHandler(filters.Document.ALL, doc_handler),
+            # MessageHandler(filters.Document.ALL, doc_handler),
         ],
         states={
-            SELECT_COLUMN: [
-                MessageHandler(
-                    filters.TEXT & ~filters.COMMAND, process_and_resample_data
-                )
+            SELECT_OPTION: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, energy_api_func)
             ],
         },
         fallbacks=[],
