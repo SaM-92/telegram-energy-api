@@ -189,6 +189,24 @@ async def doc_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return ConversationHandler.END
 
 
+async def energy_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_first_name = update.message.from_user.first_name
+    options = [
+        "Carbon intensity",
+        "Renewable energy status",
+        "Price of electricity (wholesale market)",
+    ]
+    # Create a custom keyboard with the column names
+    keyboard = [[option] for option in options]
+    reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
+
+    # Send the list of column names and instruct the user to select one
+    await update.message.reply_text(
+        f" Hey {user_first_name}, can you please let me know on which of the following categories you are interested to get info?",
+        reply_markup=reply_markup,
+    )
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_first_name = update.message.from_user.first_name
     await update.message.reply_text(
@@ -244,6 +262,7 @@ def main() -> None:
     conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler("start", start),
+            CommandHandler("energy_status", energy_status),
             MessageHandler(filters.Document.ALL, doc_handler),
         ],
         states={
