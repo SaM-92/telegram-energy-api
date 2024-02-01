@@ -41,7 +41,7 @@ def carbon_api_forecast():
         df_carbon_forecast["EffectiveTime"], format="%d-%b-%Y %H:%M:%S"
     )
     df_carbon_forecast_indexed = df_carbon_forecast.set_index("EffectiveTime")
-    return df_carbon_forecast
+    return df_carbon_forecast_indexed
 
 
 def carbon_api_intensity():
@@ -95,19 +95,18 @@ def carbon_api_intensity():
         "EffectiveTime"
     )
 
-    # Interpolate NaN values, except for the last NaN
-    df_carbon_int_interp = df_carbon_intensity_indexed.interpolate()
-
-    # Reverse the DataFrame
-    df_reversed = df_carbon_int_interp.iloc[::-1]
-
-    # Find the first valid index in the reversed DataFrame, which corresponds to the last NaN before non-NaN values
-    last_nan_index_before_non_nan = df_reversed["Value"].first_valid_index()
+    last_value_index_co_intensity = df_carbon_intensity_indexed[
+        "Value"
+    ].last_valid_index()
 
     # Select rows up to the row before the last NaN
-    df_carbon_intensity_recent = df_carbon_int_interp.loc[
-        :last_nan_index_before_non_nan
+    df_carbon_intensity_recent = df_carbon_intensity_indexed.loc[
+        :last_value_index_co_intensity
     ]
+
+    df_carbon_intensity_recent["Value"] = df_carbon_intensity_recent[
+        "Value"
+    ].interpolate()
 
     # Calculate mean, min, and max
     mean_val = df_carbon_intensity_recent["Value"].mean()
@@ -117,4 +116,4 @@ def carbon_api_intensity():
     # Create a dictionary with these values
     co2_stats_prior_day = {"mean": mean_val, "min": min_val, "max": max_val}
 
-    return co2_stats_prior_day
+    return co2_stats_prior_day, df_carbon_intensity_recent
