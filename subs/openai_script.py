@@ -8,16 +8,24 @@ def create_message(forecast_start_date, co2_values):
             self.system = system
             self.user = user
 
-    co2_values_str = ", ".join(str(value) for value in co2_values)
-    system_template = (
-        f"The following data is about the forecasted CO2 emissions starting from {forecast_start_date} "
-        f"until the end of today with a step of 30 minutes. Each value represents the CO2 intensity in grams per kWh. "
-        f"Based on the forecasted CO2 emissions data, we aim to provide simple and actionable energy usage advice."
-        f"The CO2 emissions vary throughout the day, given pattern in data, when would be the optimal times for energy consumption to minimize environmental impact?"
-        f"\n\nCO2 values are: {co2_values_str}"
+    hours = [
+        f"{(22 + i // 2) % 24}:{'00' if i % 2 == 0 else '30'}"
+        for i in range(len(co2_values))
+    ]
+    time_with_co2 = ", ".join(
+        f"{hour} (CO2: {value} g/kWh)" for hour, value in zip(hours, co2_values)
     )
 
-    user_template = "When is the best and worst time to use energy today?"
+    system_template = (
+        f"Forecasted CO2 emissions data from {forecast_start_date}, updating every 30 minutes, is provided below. "
+        f"Based on this, you are to give concise energy usage advice. Identify the most environmentally friendly hours "
+        f"for energy consumption to minimize environmental impact. Use the format: Most environmental friendly hours hh:mm, "
+        f"medium: hh:mm, and hours to avoid hh:mm. Consider high CO2 > 500, low CO2 < 250, and medium for values in between. "
+        f"\n\nCO2 values and corresponding times are: {time_with_co2}"
+        f"\n\nProvide advice on the optimal time periods for energy consumption."
+    )
+
+    user_template = "When are the best and worst time periods, on average, to use energy today from the environmental impact perspective in format of hour:minute?"
 
     system = system_template
     user = user_template
@@ -28,7 +36,7 @@ def create_message(forecast_start_date, co2_values):
 
 # Example usage
 msg = create_message(
-    forecast_start_date="2024-02-08 22:00:00", co2_values=[10, 12, 13, 14, 15, 16]
+    forecast_start_date="2024-02-08 22:00:00", co2_values=[100, 120, 453, 704, 150]
 )
 
 
@@ -44,7 +52,7 @@ def opt_gpt_summarise():
 
     # Construct the messages
     msg = create_message(
-        forecast_start_date="2024-02-08 22:00:00", co2_values=[10, 12, 13, 14, 15, 16]
+        forecast_start_date="2024-02-08 22:00:00", co2_values=[100, 120, 453, 704, 150]
     )
 
     messages = [
