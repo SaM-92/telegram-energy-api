@@ -1,61 +1,71 @@
-# Functions
-def create_message(table_name, query):
-    class message:
-        def __init__(message, system, user, column_names, column_attr):
-            message.system = system
-            message.user = user
-            message.column_names = column_names
-            message.column_attr = column_attr
+import openai
+import os
 
-    system_template = """
 
-    The following data is about the forcasted CO2 emission starts at {} untill the remaining of today, your job is to explain it simply to the user akin to a weather commentator, \n
+def create_message(forecast_start_date, co2_values):
+    class Message:
+        def __init__(self, system, user):
+            self.system = system
+            self.user = user
 
-    CO2 values are: {} \n
-    """
-
-    user_template = "Write a SQL query that returns - {}"
-
-    tbl_describe = duckdb.sql("DESCRIBE SELECT * FROM " + table_name + ";")
-    col_attr = tbl_describe.df()[["column_name", "column_type"]]
-    col_attr["column_joint"] = col_attr["column_name"] + " " + col_attr["column_type"]
-    col_names = (
-        str(list(col_attr["column_joint"].values))
-        .replace("[", "")
-        .replace("]", "")
-        .replace("'", "")
+    co2_values_str = ", ".join(str(value) for value in co2_values)
+    system_template = (
+        f"The following data is about the forecasted CO2 emissions starting from {forecast_start_date} "
+        f"until the end of today with a step of 30 minutes. Each value represents the CO2 intensity in grams per kWh. "
+        f"Based on the forecasted CO2 emissions data, we aim to provide simple and actionable energy usage advice."
+        f"The CO2 emissions vary throughout the day, given pattern in data, when would be the optimal times for energy consumption to minimize environmental impact?"
+        f"\n\nCO2 values are: {co2_values_str}"
     )
 
-    system = system_template.format(table_name, col_names)
-    user = user_template.format(query)
+    user_template = "When is the best and worst time to use energy today?"
 
-    m = message(
-        system=system,
-        user=user,
-        column_names=col_attr["column_name"],
-        column_attr=col_attr["column_type"],
-    )
+    system = system_template
+    user = user_template
+
+    m = Message(system=system, user=user)
     return m
 
 
-def add_quotes(query, col_names):
-    for i in col_names:
-        if i in query:
-            query = str(query).replace(i, '"' + i + '"')
-    return query
+# Example usage
+msg = create_message(
+    forecast_start_date="2024-02-08 22:00:00", co2_values=[10, 12, 13, 14, 15, 16]
+)
 
-
-# Set the query
-
-query = "How many cases ended up with arrest?"
-msg = create_message(table_name="chicago_crime", query=query)
-
-
-m = create_message(table_name="chicago_crime", query=query)
 
 messages = [
-    {"role": "system", "content": m.system},
-    {"role": "user", "content": m.user},
+    {"role": "system", "content": msg.system}
+    # {"role": "user", "content": msg.user},
 ]
 
-print(messages)
+
+def opt_gpt_summarise():
+    # Ensure your API key is correctly set in your environment variables
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+
+    # Construct the messages
+    msg = create_message(
+        forecast_start_date="2024-02-08 22:00:00", co2_values=[10, 12, 13, 14, 15, 16]
+    )
+
+    messages = [
+        {"role": "system", "content": msg.system}
+        # {"role": "user", "content": msg.user},
+    ]
+
+    try:
+        # Making the API call
+        response = openai.chat.completions.create(
+            model="gpt-3.5-turbo",  # or "gpt-3.5-turbo" based on your subscription
+            messages=messages,
+            max_tokens=600,  # Adjust the number of tokens as needed
+            n=1,  # Number of completions to generate
+            stop=None,  # Specify any stopping criteria if needed
+        )
+
+        # Extracting the response
+        # generated_text = response.choices[0].message['content'].strip()
+        generated_text = response.choices[0].message.content.strip()
+
+        return generated_text
+    except Exception as e:
+        return str(e)
