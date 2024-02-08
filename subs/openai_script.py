@@ -2,7 +2,7 @@ import openai
 import os
 
 
-def create_message(forecast_start_date, co2_values):
+def create_message(forecast_start_date, co2_values, user_name):
     class Message:
         def __init__(self, system, user):
             self.system = system
@@ -23,6 +23,7 @@ def create_message(forecast_start_date, co2_values):
         f"medium: hh:mm, and hours to avoid hh:mm. Consider high CO2 > 500, low CO2 < 250, and medium for values in between. "
         f"\n\nCO2 values and corresponding times are: {time_with_co2}"
         f"\n\nProvide advice on the optimal time periods for energy consumption."
+        f"\n\n start with greeting user {user_name}, based on time {forecast_start_date} "
     )
 
     user_template = "When are the best and worst time periods, on average, to use energy today from the environmental impact perspective in format of hour:minute?"
@@ -35,15 +36,15 @@ def create_message(forecast_start_date, co2_values):
 
 
 # Example usage
-msg = create_message(
-    forecast_start_date="2024-02-08 22:00:00", co2_values=[100, 120, 453, 704, 150]
-)
+# msg = create_message(
+#     forecast_start_date="2024-02-08 22:00:00", co2_values=[100, 120, 453, 704, 150]
+# )
 
 
-messages = [
-    {"role": "system", "content": msg.system}
-    # {"role": "user", "content": msg.user},
-]
+# messages = [
+#     {"role": "system", "content": msg.system}
+#     # {"role": "user", "content": msg.user},
+# ]
 
 
 def opt_gpt_summarise():
@@ -52,7 +53,9 @@ def opt_gpt_summarise():
 
     # Construct the messages
     msg = create_message(
-        forecast_start_date="2024-02-08 22:00:00", co2_values=[100, 120, 453, 704, 150]
+        forecast_start_date="2024-02-08 22:00:00",
+        co2_values=[100, 120, 453, 704, 150],
+        user_name="Saeed",
     )
 
     messages = [
