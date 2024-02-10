@@ -1,5 +1,7 @@
 import openai
 import os
+import datetime
+from datetime import timedelta
 
 
 def create_message(forecast_start_date, co2_values, user_name):
@@ -8,21 +10,27 @@ def create_message(forecast_start_date, co2_values, user_name):
             self.system = system
             self.user = user
 
+    start_datetime = datetime.datetime.strptime(
+        forecast_start_date, "%Y-%m-%d %H:%M:%S"
+    )
+
+    # Generate hours list based on the start_datetime and the length of co2_values
     hours = [
-        f"{(22 + i // 2) % 24}:{'00' if i % 2 == 0 else '30'}"
+        (start_datetime + timedelta(minutes=30 * i)).strftime("%H:%M")
         for i in range(len(co2_values))
     ]
+
     time_with_co2 = ", ".join(
         f"{hour} (CO2: {value} g/kWh)" for hour, value in zip(hours, co2_values)
     )
 
     system_template = (
         f"Forecasted CO2 emissions data from {forecast_start_date}, updating every 30 minutes, is provided below. "
-        f"Based on this, you are to give concise energy usage advice. Identify the most environmentally friendly hours "
+        f"Based on this, you are to give energy usage advice. Identify the most environmentally friendly hours "
         f"for energy consumption to minimize environmental impact. Use the format: Most environmental friendly hours hh:mm, "
         f"medium: hh:mm, and hours to avoid hh:mm. Consider high CO2 > 500, low CO2 < 250, and medium for values in between. "
         f"\n\nCO2 values and corresponding times are: {time_with_co2}"
-        f"\n\nProvide advice on the optimal time periods for energy consumption."
+        f"\n\nProvide advice on the optimal time periods for energy consumption, do not need to give CO2 values to users."
         f"\n\n start with greeting user {user_name}, based on time {forecast_start_date} "
     )
 
@@ -35,26 +43,14 @@ def create_message(forecast_start_date, co2_values, user_name):
     return m
 
 
-# Example usage
-# msg = create_message(
-#     forecast_start_date="2024-02-08 22:00:00", co2_values=[100, 120, 453, 704, 150]
-# )
-
-
-# messages = [
-#     {"role": "system", "content": msg.system}
-#     # {"role": "user", "content": msg.user},
-# ]
-
-
 def opt_gpt_summarise():
     # Ensure your API key is correctly set in your environment variables
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
     # Construct the messages
     msg = create_message(
-        forecast_start_date="2024-02-08 22:00:00",
-        co2_values=[100, 120, 453, 704, 150],
+        forecast_start_date=str(df_.index[0]),
+        co2_values=df_.Value.values,
         user_name="Saeed",
     )
 
