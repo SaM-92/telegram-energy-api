@@ -44,6 +44,16 @@ def carbon_api_forecast():
         df_carbon_forecast["EffectiveTime"], format="%d-%b-%Y %H:%M:%S"
     )
     df_carbon_forecast_indexed = df_carbon_forecast.set_index("EffectiveTime")
+
+    last_value_index_co_forecast = df_carbon_forecast_indexed[
+        "Value"
+    ].last_valid_index()
+
+    # Select rows up to the row before the last NaN
+    df_carbon_forecast_indexed = df_carbon_forecast_indexed.loc[
+        :last_value_index_co_forecast
+    ]
+
     return df_carbon_forecast_indexed
 
 
