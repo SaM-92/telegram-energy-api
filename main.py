@@ -12,6 +12,7 @@ from telegram.ext import (
     CallbackContext,
 )
 from subs.energy_api import *
+from subs.openai_script import *
 
 # from subs.data_loader import (
 #     process_data_for_analysis,
@@ -251,7 +252,10 @@ async def energy_api_func(update: Update, context: CallbackContext):
         df_ = status_classification(df_carbon_forecast_indexed, co2_stats_prior_day)
         # Specify the chat ID of the recipient (could be a user or a group)
         # Send the image stored in buffer
+        gpt_recom = opt_gpt_summarise(df_)
+        await update.message.reply_text(gpt_recom)
         await send_co2_intensity_plot(update, context, df_)
+
     else:
         await update.message.reply_text(
             f"Sorry {user_first_name}! 🤖 We are still working on this feature. Please try again later."
