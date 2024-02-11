@@ -1,7 +1,7 @@
 azure-functions
-python-telegram-bot
+python-telegram-bot==20.7
 pandas
 numpy
-matplotlib
-requests
-openai
+matplotlib==3.7.0
+requests==2.31.0
+openai==1.11.1
