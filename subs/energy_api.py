@@ -198,8 +198,6 @@ def co2_int_plot(df_):
         df["EffectiveTime"].dt.strftime("%Y-%m-%d %H:%M"), color="white", fontsize=8
     )
 
-    plt.tight_layout()
-
     ax.set_title(
         "CO2 Intensity Forecast for the Remaining Hours of Today", color="white"
     )
@@ -217,5 +215,5 @@ def co2_int_plot(df_):
     cbar.set_ticklabels(
         [100, 600], color="white"
     )  # Format min and max values as labels
-
-  return plt 
+    plt.tight_layout()
+    return plt

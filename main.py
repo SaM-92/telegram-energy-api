@@ -190,22 +190,26 @@ async def doc_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return ConversationHandler.END
 
 
+async def send_co2_intensity_plot(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, df_
+):
+    chat_id = update.effective_chat.id
+
+    # Call the function to generate the plot
+    plt = co2_int_plot(df_)
+
+    # Save the plot to a BytesIO buffer
+    buf = BytesIO()
+    plt.savefig(buf, format="png", facecolor="black")
+    buf.seek(0)
+    plt.close()  # Make sure to close the plot to free up memory
+
+    # Send the photo
+    await context.bot.send_photo(chat_id=chat_id, photo=buf)
+
+
 async def energy_api_func(update: Update, context: CallbackContext):
-    """
-    Handles the processing and resampling of uploaded time series data.
 
-    This function is triggered when the user selects a time column for the uploaded data.
-    It performs data preprocessing, including handling missing values and resampling the data
-    to an hourly resolution. The function also sends back the processed data to the user along with
-    some basic statistics.
-
-    Args:
-        update (telegram.Update): The incoming update from the user.
-        context (telegram.ext.CallbackContext): The context for the conversation.
-
-    Returns:
-        int: The next state in the conversation flow.
-    """
     user_first_name = update.message.from_user.first_name
 
     await update.message.reply_text(
@@ -247,7 +251,7 @@ async def energy_api_func(update: Update, context: CallbackContext):
         df_ = status_classification(df_carbon_forecast_indexed, co2_stats_prior_day)
         # Specify the chat ID of the recipient (could be a user or a group)
         # Send the image stored in buffer
-        co2_int_plot(df_, chat_id, context)
+        await send_co2_intensity_plot(update, context, df_)
     else:
         await update.message.reply_text(
             f"Sorry {user_first_name}! 🤖 We are still working on this feature. Please try again later."
