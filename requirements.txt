@@ -1,0 +1,7 @@
+azure-functions
+python-telegram-bot
+pandas
+numpy
+matplotlib
+requests
+openai
