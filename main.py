@@ -270,7 +270,7 @@ async def energy_api_func(update: Update, context: CallbackContext):
 async def energy_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_first_name = update.message.from_user.first_name
     options = [
-        "Carbon intensity advisor",
+        "Carbon intensity",
         "Renewable energy status [Under Deveoplment]",
         "Price of electricity (wholesale market) [Under Deveoplment]",
     ]
@@ -291,7 +291,7 @@ async def energy_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_first_name = update.message.from_user.first_name
     await update.message.reply_text(
-        f" Welcome {user_first_name}!! 😃 Please upload a CSV file, and be sure it has time column!"
+        f"{user_first_name}!! 😃 Use the command /energy_status to kick off your inquiry!"
     )
 
 
@@ -309,20 +309,25 @@ def is_not_command(update):
 
 
 async def help_command(update: Update, context: CallbackContext) -> None:
-    user_first_name = update.message.from_user.first_name
+    # user_first_name = update.message.from_user.first_name
     await update.message.reply_text(
-        f"{user_first_name}, you can use /start to begin the process. Send a time series data file for analysis in CSV format. "
-        "The bot will process the data, interpolating missing values, and resample it to an hourly resolution."
-        "You can then download the processed data file."
+        "🔍 Need help getting started? Here’s how to use me: \n\n"
+        "Use the command /energy_status to kick off your inquiry. I’ll guide you through a simple selection process to understand your needs. "
+        "Based on real-time data analysis, I'll provide energy usage recommendations to help you be more eco-friendly. "
+        "Additionally, you’ll receive a colour-coded image to visually guide you in scheduling your day’s energy consumption efficiently. "
+        "With my help, you can make your energy usage as green as possible!"
     )
 
 
 async def about_command(update: Update, context: CallbackContext) -> None:
     await update.message.reply_text(
-        " 🤖 This is a demo bot for time series data analysis. It processes uploaded data, "
-        "takes care of missing values by linear interpolation, and changes the sample "
-        "to an hourly resolution. It's primarily oriented around ENTSO-E dataset analysis. "
-        "After processing, you can download a CSV file with 1-hour resolution data and receive a brief data analysis."
+        "🤖 Welcome to the CleanEnergyBot, your go-to source for electricity insights in Ireland! "
+        "Currently exclusive to Ireland, this bot leverages real-time data from EirGrid, the entity tasked "
+        "with electricity delivery across the country. Our latest version offers an insightful analysis of CO2 "
+        "emissions forecasts for today, comparing these figures with yesterday's values and EU standard rates. "
+        "Through detailed data analysis and supported by the advanced capabilities of GPT-3, our bot provides "
+        "tailored recommendations on the most efficient times for energy usage. It makes your energy decisions stronger with "
+        "smart insights and helps you contribute to a more sustainable future."
     )
 
 
