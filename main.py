@@ -14,13 +14,6 @@ from telegram.ext import (
 from subs.energy_api import *
 from subs.openai_script import *
 
-# from subs.data_loader import (
-#     process_data_for_analysis,
-#     process_uploaded_file,
-#     convert_time,
-#     process_time_resolution_and_duplicates,
-#     display_column_statistics,
-# )
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -214,7 +207,7 @@ async def energy_api_func(update: Update, context: CallbackContext):
     user_first_name = update.message.from_user.first_name
 
     await update.message.reply_text(
-        f"""Thank you {user_first_name}! 🤖 We are now processing your request and we will get back to you shortly."""
+        f"""Thank you! \n 🚀 We are now processing your request and we will get back to you shortly. \n ⏱️ It takes up to 10 seconds.. """
     )
     # Retrieve the text of the message sent by the user. This is assumed to be the column name
     # the user has selected.
@@ -277,9 +270,9 @@ async def energy_api_func(update: Update, context: CallbackContext):
 async def energy_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_first_name = update.message.from_user.first_name
     options = [
-        "Carbon intensity",
-        "Renewable energy status",
-        "Price of electricity (wholesale market)",
+        "Carbon intensity advisor",
+        "Renewable energy status [Under Deveoplment]",
+        "Price of electricity (wholesale market) [Under Deveoplment]",
     ]
     # Create a custom keyboard with the column names
     keyboard = [[option] for option in options]
@@ -287,7 +280,7 @@ async def energy_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # send the list of options and ask the user to select one
     await update.message.reply_text(
-        f"Hello {user_first_name}! I'm here to help you with energy insights. Which category would you like more information about?",
+        "I'm here to help you with energy insights. Which category would you like more information about?",
         reply_markup=reply_markup,
     )
     # Set the conversation state to SELECT_COLUMN
