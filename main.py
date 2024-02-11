@@ -11,6 +11,7 @@ from telegram.ext import (
     ConversationHandler,
     CallbackContext,
 )
+from subs.energy_api import *
 
 # from subs.data_loader import (
 #     process_data_for_analysis,
@@ -238,8 +239,15 @@ async def energy_api_func(update: Update, context: CallbackContext):
         f"I understand that you have selected: {selected_option_user}"
     )
 
+    chat_id = update.effective_chat.id
+
     if selected_option_user == "Carbon intensity":
-        sadas
+        df_carbon_forecast_indexed = carbon_api_forecast()
+        co2_stats_prior_day, df_carbon_intensity_recent = carbon_api_intensity()
+        df_ = status_classification(df_carbon_forecast_indexed, co2_stats_prior_day)
+        # Specify the chat ID of the recipient (could be a user or a group)
+        # Send the image stored in buffer
+        co2_int_plot(df_, chat_id, context)
     else:
         await update.message.reply_text(
             f"Sorry {user_first_name}! 🤖 We are still working on this feature. Please try again later."

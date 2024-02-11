@@ -3,6 +3,7 @@ import pandas as pd
 import datetime
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+from io import BytesIO
 
 
 def carbon_api_forecast():
@@ -217,5 +218,4 @@ def co2_int_plot(df_):
         [100, 600], color="white"
     )  # Format min and max values as labels
 
-    # Display the plot.
-    plt.show()
+  return plt 
