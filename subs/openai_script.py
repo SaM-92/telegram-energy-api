@@ -43,7 +43,7 @@ def create_message(forecast_start_date, co2_values, user_name):
     return m
 
 
-def opt_gpt_summarise():
+def opt_gpt_summarise(df_):
     # Ensure your API key is correctly set in your environment variables
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
