@@ -252,7 +252,15 @@ async def energy_api_func(update: Update, context: CallbackContext):
         df_ = status_classification(df_carbon_forecast_indexed, co2_stats_prior_day)
         # Specify the chat ID of the recipient (could be a user or a group)
         # Send the image stored in buffer
-        gpt_recom = opt_gpt_summarise(df_)
+        date = str(df_.index[0])
+        eu_summary_text = optimize_categorize_periods(df_)
+        quantile_summary_text = find_optimized_relative_periods(
+            df_
+        )  # Generate this based on your DataFrame
+        prompt = create_combined_gpt_prompt(
+            date, eu_summary_text, quantile_summary_text
+        )
+        gpt_recom = opt_gpt_summarise(prompt)
         await update.message.reply_text(gpt_recom)
         await send_co2_intensity_plot(update, context, df_)
 

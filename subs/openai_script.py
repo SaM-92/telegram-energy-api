@@ -2,60 +2,126 @@ import openai
 import os
 import datetime
 from datetime import timedelta
+import numpy as np
+import pandas as pd
 
 
-def create_message(forecast_start_date, co2_values, user_name):
-    class Message:
-        def __init__(self, system, user):
-            self.system = system
-            self.user = user
+def optimize_categorize_periods(df):
+    # Define thresholds for CO2 emission categorization
+    low_threshold, high_threshold = 250, 500
 
-    start_datetime = datetime.datetime.strptime(
-        forecast_start_date, "%Y-%m-%d %H:%M:%S"
+    # Categorize each timestamp
+    df["category"] = pd.cut(
+        df["Value"],
+        bins=[-np.inf, low_threshold, high_threshold, np.inf],
+        labels=["Low", "Medium", "High"],
     )
 
-    # Generate hours list based on the start_datetime and the length of co2_values
-    hours = [
-        (start_datetime + timedelta(minutes=30 * i)).strftime("%H:%M")
-        for i in range(len(co2_values))
-    ]
+    # Find consecutive periods with the same category
+    df["group"] = (df["category"] != df["category"].shift()).cumsum()
 
-    time_with_co2 = ", ".join(
-        f"{hour} (CO2: {value} g/kWh)" for hour, value in zip(hours, co2_values)
+    # Initialize summary text
+    summary_text = "Based on the forecasted CO2 emissions data for today, distinct periods are identified as:\n\n"
+
+    # Initialize a dictionary to store concatenated periods for each category
+    period_summary = {"Low": [], "Medium": [], "High": []}
+
+    # Group by category and group to concatenate periods
+    for category, group in df.groupby(["category", "group"]):
+        start_time = group.index.min().strftime("%H:%M")
+        end_time = group.index.max().strftime("%H:%M")
+        period_str = (
+            f"{start_time} to {end_time}" if start_time != end_time else f"{start_time}"
+        )
+        period_summary[category[0]].append(period_str)
+
+    # Format the summary text for each category
+    for category in ["Low", "Medium", "High"]:
+        if period_summary[category]:
+            periods = ", ".join(period_summary[category])
+            summary_text += f"{category} CO2 Emission Periods: {periods}.\n"
+        else:
+            summary_text += (
+                f"{category} CO2 Emission Periods: No specific periods identified.\n"
+            )
+
+    return summary_text
+
+
+def find_optimized_relative_periods(df):
+    # Normalize CO2 values to a 0-1 scale
+    df["normalized"] = (df["Value"] - df["Value"].min()) / (
+        df["Value"].max() - df["Value"].min()
     )
 
-    system_template = (
-        f"Forecasted CO2 emissions data from {forecast_start_date}, updating every 30 minutes, is provided below. "
-        f"Based on this, you are to give energy usage advice. Identify the most environmentally friendly hours "
-        f"for energy consumption to minimize environmental impact. Use the format: Most environmental friendly hours hh:mm, "
-        f"medium: hh:mm, and hours to avoid hh:mm. Consider high CO2 > 500, low CO2 < 250, and medium for values in between. "
-        f"\n\nCO2 values and corresponding times are: {time_with_co2}"
-        f"\n\nProvide advice on the optimal time periods for energy consumption, do not need to give CO2 values to users."
-        f"\n\n start with greeting user {user_name}, based on time {forecast_start_date} "
+    # Define thresholds for relative categorization
+    low_threshold = df["normalized"].quantile(0.33)
+    high_threshold = df["normalized"].quantile(0.66)
+
+    # Categorize each timestamp
+    df["category"] = pd.cut(
+        df["normalized"],
+        bins=[-np.inf, low_threshold, high_threshold, np.inf],
+        labels=["Low", "Medium", "High"],
     )
 
-    user_template = "When are the best and worst time periods, on average, to use energy today from the environmental impact perspective in format of hour:minute?"
+    # Find consecutive periods with the same category
+    df["group"] = (df["category"] != df["category"].shift()).cumsum()
 
-    system = system_template
-    user = user_template
+    # Prepare summary text
+    summary_text = "Considering absolute CO2 emission values, distinct periods are identified as:\n\n"
 
-    m = Message(system=system, user=user)
-    return m
+    # Initialize a dictionary to store concatenated periods for each category
+    period_summary = {"Low": [], "Medium": [], "High": []}
+
+    # Group by category and group to concatenate periods
+    for category, group in df.groupby(["category", "group"]):
+        start_time = group.index.min().strftime("%H:%M")
+        end_time = group.index.max().strftime("%H:%M")
+        # For periods that start and end at the same time, just show one time
+        period_str = (
+            f"{start_time} to {end_time}" if start_time != end_time else f"{start_time}"
+        )
+        period_summary[category[0]].append(period_str)
+
+    # Format the summary text for each category
+    for category in ["Low", "Medium", "High"]:
+        if period_summary[category]:
+            periods = ", ".join(period_summary[category])
+            summary_text += f"{category} CO2 Emission Period: {periods}.\n"
+        else:
+            summary_text += (
+                f"{category} CO2 Emission Period: No specific periods identified.\n"
+            )
+
+    return summary_text
 
 
-def opt_gpt_summarise(df_):
+def create_combined_gpt_prompt(date, eu_summary_text, quantile_summary_text):
+    prompt = (
+        f"Based on the forecasted CO2 emissions data for {date}, here are two analyses:\n\n"
+        "1. **EU Standards Analysis**:\n"
+        f"{eu_summary_text}\n\n"
+        "2. ** Data Analysis**:\n"
+        f"{quantile_summary_text}\n\n"
+        "Given these detailed analyses, please provide advice on how to align energy consumption to minimize environmental impact, "
+        "First start with an overview based on the EU standards. Then, consider only nuanced day-to-day variations.  "
+        "Highlight the optimal times for energy usage based on Data Analysis values, especially focusing on the absolute lowest and highest CO2 emission periods identified in the detailed analysis. "
+        "The goal is to offer guidance that helps individuals effectively reduce their carbon footprint, "
+        "using the insights from both the EU standards perspective and the data analysis. Make it short and cocise and give users time categories"
+    )
+
+    return prompt
+
+
+def opt_gpt_summarise(prompt):
     # Ensure your API key is correctly set in your environment variables
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
     # Construct the messages
-    msg = create_message(
-        forecast_start_date=str(df_.index[0]),
-        co2_values=df_.Value.values,
-        user_name="Saeed",
-    )
 
     messages = [
-        {"role": "system", "content": msg.system}
+        {"role": "system", "content": prompt}
         # {"role": "user", "content": msg.user},
     ]
 
@@ -64,6 +130,7 @@ def opt_gpt_summarise(df_):
         response = openai.chat.completions.create(
             model="gpt-3.5-turbo",  # or "gpt-3.5-turbo" based on your subscription
             messages=messages,
+            temperature=1,
             max_tokens=600,  # Adjust the number of tokens as needed
             n=1,  # Number of completions to generate
             stop=None,  # Specify any stopping criteria if needed
