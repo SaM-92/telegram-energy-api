@@ -4,6 +4,11 @@ import datetime
 from datetime import timedelta
 import numpy as np
 import pandas as pd
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 
 def optimize_categorize_periods(df):
@@ -116,7 +121,7 @@ def create_combined_gpt_prompt(date, eu_summary_text, quantile_summary_text):
 
 def opt_gpt_summarise(prompt):
     # Ensure your API key is correctly set in your environment variables
-    openai.api_key = os.getenv("OPENAI_API_KEY")
+    openai.api_key = OPENAI_API_KEY  # os.getenv("OPENAI_API_KEY")
 
     # Construct the messages
 

@@ -42,7 +42,3 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Azurite artifacts
-__blobstorage__
-__queuestorage__
-__azurite_db*__.json

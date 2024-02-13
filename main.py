@@ -13,7 +13,11 @@ from telegram.ext import (
 )
 from subs.energy_api import *
 from subs.openai_script import *
+from dotenv import load_dotenv
 
+# Load environment variables from .env file
+load_dotenv()
+Telegram_energy_api = os.environ.get("Telegram_energy_api")
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -180,7 +184,7 @@ def main() -> None:
     This function creates an Application instance, sets up the conversation handlers,
     and starts the bot to listen for incoming messages and commands.
     """
-    token = os.environ.get("Telegram_energy_api")
+    token = Telegram_energy_api  # os.environ.get("Telegram_energy_api")
     # Create the Application instance
     application = Application.builder().token(token).build()
 
