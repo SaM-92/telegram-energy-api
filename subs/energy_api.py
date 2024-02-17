@@ -34,7 +34,10 @@ def carbon_api_forecast():
 
     # Create the URL
     api_url = create_url(start_time, end_time, region[2])
-    response = requests.get(api_url)
+
+    # Make a request with SSL verification disabled due to existing issue from EirGrid
+    response = requests.get(api_url, verify=False)
+
     Rs = response.json()
 
     df_carbon_forecast = pd.DataFrame(Rs["Rows"])
