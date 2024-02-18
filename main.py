@@ -223,7 +223,7 @@ async def start_over_handler(update: Update, context: CallbackContext) -> int:
 
 async def end_conversation_handler(update: Update, context: CallbackContext) -> int:
     await update.message.reply_text(
-        "Thank you for using our service. Have a great day!"
+        "Thank you for using our service. Have a great day! 💚 🌎"
     )
     return ConversationHandler.END
 
@@ -267,9 +267,7 @@ async def feedback_command(update: Update, context: CallbackContext) -> int:
 
 async def feedback_text(update: Update, context: CallbackContext) -> int:
     logger.info("Entered feedback_text")
-    # await update.message.reply_text("Ti'm hereee!")
     feedback = update.message.text
-    # await update.message.reply_text(f"{feedback}")
 
     # # Forward the feedback to your Telegram ID or handle it as needed
     # your_telegram_user_id = 5118459178
@@ -283,7 +281,7 @@ async def feedback_text(update: Update, context: CallbackContext) -> int:
         message_id=update.message.message_id,
     )
 
-    await update.message.reply_text("Thank you for your feedback!")
+    await update.message.reply_text("Thank you for your feedback! ✨")
     return ConversationHandler.END
 
 
