@@ -3,7 +3,7 @@ name: CI/CD to Azure Container Apps
 on:
   push:
     branches:
-      - main
+      - deployment_branch
 
 jobs:
   build_and_deploy:
