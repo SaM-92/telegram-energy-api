@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 Telegram_energy_api = os.environ.get("Telegram_energy_api")
-
+CHANNEL_ID_FOR_FEEDBACK = os.environ.get("CHANNEL_ID_FOR_FEEDBACK")
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -278,7 +278,7 @@ async def feedback_text(update: Update, context: CallbackContext) -> int:
     # )
 
     await context.bot.forward_message(
-        chat_id="-2023788910",
+        chat_id=CHANNEL_ID_FOR_FEEDBACK,
         from_chat_id=update.effective_chat.id,
         message_id=update.message.message_id,
     )
