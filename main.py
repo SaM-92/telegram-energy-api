@@ -254,7 +254,7 @@ async def follow_up(update: Update, context: CallbackContext) -> int:
     contact_message = (
         "Operation completed. 🎉 Feel free to use /start to explore other functionalities or /help if you require assistance.\n"
         "If you have feedback or need to contact me directly, here are the ways you can reach out:\n"
-        "- Email: 📧 sam.misaian@gmail.com\n"
+        "- Email: 📧 sam.misaqian@gmail.com\n"
         "- GitHub: 💻 https://github.com/SaM-92\n"
         "- LinkedIn: 🔗 https://www.linkedin.com/in/saeed-misaghian/\n"
         "Or you can send your feedback directly here by typing your message after /feedback."
