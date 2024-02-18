@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 # SELECT_OPTION = 0
 TIME_COLUMN_SELECTED = 1
 # FOLLOW_UP = 0
-SELECT_OPTION, FOLLOW_UP = range(2)
+SELECT_OPTION, FOLLOW_UP, FEEDBACK = range(3)
 
 
 async def send_co2_intensity_plot(
@@ -35,7 +35,7 @@ async def send_co2_intensity_plot(
 ):
 
     caption_text = (
-        "CO2 Intensity Forecast: This visualization presents today's CO2 emission trends and intensity levels, "
+        "This visualization presents today's CO2 emission trends and intensity levels, "
         "emphasizing expected changes over the course of the day. The blue line delineates the emission trend, accompanied by "
         "color-coded circles indicating value intensity at specific points. Additionally, colored circles positioned at the bottom "
         "of the image correspond to intensity levels at 30-minute intervals—green signifies low intensity, orange denotes medium, "
@@ -87,10 +87,10 @@ async def energy_api_func(update: Update, context: CallbackContext):
     # chosen by the user for further data processing.
     selected_option_user = user_data.get("selected_option")
 
-    # Inform the user that the time column has been selected
-    await update.message.reply_text(
-        f"I understand that you have selected: {selected_option_user}"
-    )
+    # # Inform the user that the time column has been selected
+    # await update.message.reply_text(
+    #     f"I understand that you have selected: {selected_option_user}"
+    # )
 
     chat_id = update.effective_chat.id
 
@@ -123,7 +123,7 @@ async def energy_api_func(update: Update, context: CallbackContext):
     # Decide the next state dynamically and store it in context.user_data
     # context.user_data["next_state_2"] = FOLLOW_UP  # Or some other state based on logic
     # After processing, directly inform the user of the next steps.
-    options_keyboard = [["Start Over", "End Conversation"]]
+    options_keyboard = [["Start Over", "End Conversation", "Provide Feedback"]]
     reply_markup = ReplyKeyboardMarkup(options_keyboard, one_time_keyboard=True)
 
     await update.message.reply_text(
@@ -202,28 +202,11 @@ async def about_command(update: Update, context: CallbackContext) -> None:
     )
 
 
-async def follow_up(update: Update, context: CallbackContext) -> int:
-    """
-    Prompt users with options for further actions after completing an operation.
-
-    This asynchronous function sends a message to users, suggesting they can either
-    restart the process by using the /start command or seek additional support through /help.
-    It signifies an open-ended pathway for users, ensuring they are not left at a dead-end
-    after an action completes.
-    """
-    await update.message.reply_text(
-        "Operation completed. Feel free to use /start to explore other functionalities or /help if you require assistance."
-    )
-    return ConversationHandler.END
-
-
 async def cancel(update: Update, context) -> int:
     """
     Sends a message that the conversation is canceled and ends the conversation asynchronously.
     """
-    await update.message.reply_text(
-        "Operation canceled. Use /start to begin again or /help for more options."
-    )
+    await update.message.reply_text("Operation canceled.")
     return ConversationHandler.END
 
 
@@ -254,6 +237,117 @@ async def unexpected_input_handler(update: Update, context: CallbackContext) -> 
     return FOLLOW_UP
 
 
+async def follow_up(update: Update, context: CallbackContext) -> int:
+    """
+    Prompt users with options for further actions after completing an operation.
+
+    This asynchronous function sends a message to users, suggesting they can either
+    restart the process by using the /start command or seek additional support through /help.
+    It signifies an open-ended pathway for users, ensuring they are not left at a dead-end
+    after an action completes.
+    """
+    # Instructions including email and GitHub, and how to send feedback directly
+    contact_message = (
+        "Operation completed. 🎉 Feel free to use /start to explore other functionalities or /help if you require assistance.\n"
+        "If you have feedback or need to contact me directly, here are the ways you can reach out:\n"
+        "- Email: 📧 sam.misaian@gmail.com\n"
+        "- GitHub: 💻 https://github.com/SaM-92\n"
+        "- LinkedIn: 🔗 https://www.linkedin.com/in/saeed-misaghian/\n"
+        "Or you can send your feedback directly here by typing your message after /feedback."
+    )
+    await update.message.reply_text(contact_message)
+    return ConversationHandler.END
+
+
+async def feedback_command(update: Update, context: CallbackContext) -> int:
+    logger.info("Entered feedback_command")
+    await update.message.reply_text("Please type your feedback.")
+    return FEEDBACK
+
+
+async def feedback_text(update: Update, context: CallbackContext) -> int:
+    logger.info("Entered feedback_text")
+    # await update.message.reply_text("Ti'm hereee!")
+    feedback = update.message.text
+    # await update.message.reply_text(f"{feedback}")
+
+    # # Forward the feedback to your Telegram ID or handle it as needed
+    # your_telegram_user_id = 5118459178
+    # await context.bot.send_message(
+    #     chat_id=your_telegram_user_id, text=f"Received feedback: {feedback}"
+    # )
+
+    await context.bot.forward_message(
+        chat_id="-2023788910",
+        from_chat_id=update.effective_chat.id,
+        message_id=update.message.message_id,
+    )
+
+    await update.message.reply_text("Thank you for your feedback!")
+    return ConversationHandler.END
+
+
+#  def main() -> None:
+#     """
+#     Entry point of the program.
+#     Initialises the application and sets up the handlers.
+
+#     This function creates an Application instance, sets up the conversation handlers,
+#     and starts the bot to listen for incoming messages and commands.
+#     """
+#     token = Telegram_energy_api  # os.environ.get("Telegram_energy_api")
+#     # Create the Application instance
+#     application = Application.builder().token(token).build()
+
+#     # SELECT_OPTION = 0
+#     # SELECT_OPTION, FOLLOW_UP = range(2)  # Define states
+#     # SELECT_OPTION, FOLLOW_UP, FEEDBACK = range(3)  # Correctly define states
+
+#     # Create a ConversationHandler for handling the file upload and column selection
+#     conv_handler = ConversationHandler(
+#         entry_points=[
+#             CommandHandler("start", start),
+#             CommandHandler("energy_status", energy_status),
+#             # MessageHandler(filters.Document.ALL, doc_handler),
+#         ],
+#         states={
+#             SELECT_OPTION: [
+#                 MessageHandler(filters.TEXT & ~filters.COMMAND, energy_api_func)
+#             ],
+#             FOLLOW_UP: [
+#                 MessageHandler(filters.Regex("^(Start Over)$"), start_over_handler),
+#                 MessageHandler(
+#                     filters.Regex("^(End Conversation)$"), end_conversation_handler
+#                 ),
+#                 MessageHandler(filters.Regex("^(Provide Feedback)$"), follow_up),
+#                 # Add a fallback handler within FOLLOW_UP for unexpected inputs
+#                 MessageHandler(filters.ALL, unexpected_input_handler),
+#             ],
+#             FEEDBACK: [MessageHandler(filters.TEXT & ~filters.COMMAND, feedback_text)],
+#         },
+#         fallbacks=[
+#             CommandHandler(
+#                 "cancel", cancel
+#             ),  # Allows the user to cancel the conversation
+#         ],
+#     )
+
+#     application.add_handler(conv_handler)
+#     application.add_handler(CommandHandler("start", start))  # Global handler
+#     application.add_handler(
+#         CommandHandler("energy_status", energy_status)
+#     )  # Global handler
+#     application.add_handler(CommandHandler("help", help_command))
+#     application.add_handler(CommandHandler("about", about_command))
+#     application.add_handler(CommandHandler("SocialMedia", follow_up))
+#     application.add_handler(CommandHandler("feedback", feedback_command))
+#     application.add_handler(
+#         CommandHandler("cancel", cancel)
+#     )  # Directly handle cancel command
+
+#     application.run_polling()
+
+
 def main() -> None:
     """
     Entry point of the program.
@@ -266,13 +360,14 @@ def main() -> None:
     # Create the Application instance
     application = Application.builder().token(token).build()
 
-    # SELECT_OPTION = 0
-    SELECT_OPTION, FOLLOW_UP = range(2)  # Define states
+    SELECT_OPTION, FOLLOW_UP, FEEDBACK = range(3)  # Correctly define states
+
     # Create a ConversationHandler for handling the file upload and column selection
     conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler("start", start),
             CommandHandler("energy_status", energy_status),
+            CommandHandler("feedback", feedback_command),
             # MessageHandler(filters.Document.ALL, doc_handler),
         ],
         states={
@@ -284,9 +379,11 @@ def main() -> None:
                 MessageHandler(
                     filters.Regex("^(End Conversation)$"), end_conversation_handler
                 ),
+                MessageHandler(filters.Regex("^(Provide Feedback)$"), follow_up),
                 # Add a fallback handler within FOLLOW_UP for unexpected inputs
                 MessageHandler(filters.ALL, unexpected_input_handler),
             ],
+            FEEDBACK: [MessageHandler(filters.TEXT & ~filters.COMMAND, feedback_text)],
         },
         fallbacks=[
             CommandHandler(
@@ -302,6 +399,8 @@ def main() -> None:
     )  # Global handler
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("about", about_command))
+    application.add_handler(CommandHandler("SocialMedia", follow_up))
+    application.add_handler(CommandHandler("feedback", feedback_command))
     application.add_handler(
         CommandHandler("cancel", cancel)
     )  # Directly handle cancel command
