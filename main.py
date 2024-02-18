@@ -15,7 +15,7 @@ from subs.energy_api import *
 from subs.openai_script import *
 from dotenv import load_dotenv
 
-# add vars to azure
+# add vars to azure.
 # Load environment variables from .env file
 load_dotenv()
 Telegram_energy_api = os.environ.get("Telegram_energy_api")
