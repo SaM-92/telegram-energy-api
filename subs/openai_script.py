@@ -26,10 +26,13 @@ def optimize_categorize_periods(df):
     df["group"] = (df["category"] != df["category"].shift()).cumsum()
 
     # Initialize summary text
-    summary_text = "Based on the forecasted CO2 emissions data for today, distinct periods are identified as:\n\n"
-
+    # summary_text = "Based on the forecasted CO2 emissions data for today, distinct periods are identified as:\n\n"
+    summary_text = ""
     # Initialize a dictionary to store concatenated periods for each category
     period_summary = {"Low": [], "Medium": [], "High": []}
+
+    # Define emojis for each category
+    emoji_dict = {"Low": "🟢", "Medium": "🟡", "High": "🔴"}
 
     # Group by category and group to concatenate periods
     for category, group in df.groupby(["category", "group"]):
@@ -44,11 +47,9 @@ def optimize_categorize_periods(df):
     for category in ["Low", "Medium", "High"]:
         if period_summary[category]:
             periods = ", ".join(period_summary[category])
-            summary_text += f"{category} CO2 Emission Periods: {periods}.\n"
+            summary_text += f"- {emoji_dict[category]} {category} Emission: {periods}\n"
         else:
-            summary_text += (
-                f"{category} CO2 Emission Periods: No specific periods identified.\n"
-            )
+            summary_text += f"- {emoji_dict[category]} {category} Emission: No specific periods identified.\n"
 
     return summary_text
 
@@ -74,49 +75,62 @@ def find_optimized_relative_periods(df):
     df["group"] = (df["category"] != df["category"].shift()).cumsum()
 
     # Prepare summary text
-    summary_text = "Considering absolute CO2 emission values, distinct periods are identified as:\n\n"
+    # summary_text = "Considering absolute CO2 emission values, determined by data trends, distinct periods are identified as:\n\n"
+    summary_text = ""
 
     # Initialize a dictionary to store concatenated periods for each category
     period_summary = {"Low": [], "Medium": [], "High": []}
 
+    # Define emojis for each category
+    emoji_dict = {"Low": "🟢", "Medium": "🟡", "High": "🔴"}
+
     # Group by category and group to concatenate periods
-    for category, group in df.groupby(["category", "group"]):
-        start_time = group.index.min().strftime("%H:%M")
-        end_time = group.index.max().strftime("%H:%M")
+    for (category, group), data in df.groupby(["category", "group"]):
+        start_time = data.index.min().strftime("%H:%M")
+        end_time = data.index.max().strftime("%H:%M")
         # For periods that start and end at the same time, just show one time
         period_str = (
-            f"{start_time} to {end_time}" if start_time != end_time else f"{start_time}"
+            f"{start_time} to {end_time}" if start_time != end_time else start_time
         )
-        period_summary[category[0]].append(period_str)
+        period_summary[category].append(period_str)
 
     # Format the summary text for each category
     for category in ["Low", "Medium", "High"]:
         if period_summary[category]:
             periods = ", ".join(period_summary[category])
-            summary_text += f"{category} CO2 Emission Period: {periods}.\n"
+            summary_text += f"- {emoji_dict[category]} {category} Emission: {periods}\n"
         else:
-            summary_text += (
-                f"{category} CO2 Emission Period: No specific periods identified.\n"
-            )
+            summary_text += f"- {emoji_dict[category]} {category} Emission: No specific periods identified.\n"
 
-    return summary_text
+    return summary_text, df
 
 
 def create_combined_gpt_prompt(date, eu_summary_text, quantile_summary_text):
-    prompt = (
-        f"Based on the forecasted CO2 emissions data for {date}, here are two analyses:\n\n"
-        "1. **EU Standards Analysis**:\n"
+    prompt_data = (
+        f"🌍 CO2 Emissions Forecast for {date}:\n\n"
+        "1. **EU Standards Analysis 🇪🇺 **:\n"
         f"{eu_summary_text}\n\n"
-        "2. ** Data Analysis**:\n"
+        "2. ** Data Trend 🔍 **:\n"
         f"{quantile_summary_text}\n\n"
-        "Given these detailed analyses, please provide advice on how to align energy consumption to minimize environmental impact, "
-        "First start with an overview based on the EU standards. Then, consider only nuanced day-to-day variations.  "
-        "Highlight the optimal times for energy usage based on Data Analysis values, especially focusing on the absolute lowest and highest CO2 emission periods identified in the detailed analysis. "
-        "The goal is to offer guidance that helps individuals effectively reduce their carbon footprint, "
-        "using the insights from both the EU standards perspective and the data analysis. Make it short and cocise and give users time categories"
     )
 
-    return prompt
+    structure_example = (
+        "📋 CO2 Emission Brief & Energy Efficiency Guide:\n"
+        "- 🇪🇺 EU Standards Forecast: ONLY report it\n"
+        "- 🔍 Data Trend Schedule: ONLY report it\n"
+        "- 💡 Energy-Saving Actions: ONLY give an example per each category of Data Trend\n"
+    )
+
+    prompt_text = (
+        f"📊 Given the CO2 emission forecasts and detailed analysis for {date}, let's explore how we can adjust our "
+        "energy consumption to minimize our environmental impact. Our aim is to provide straightforward and practical "
+        "advice, utilizing specific data trends.\n\n"
+        f"{prompt_data}"
+        "💡 In periods of low emissions, feel free to use energy-intensive appliances without much concern for reduction.\n\n"
+        f"👉 Please use the following format for your response: \n\n {structure_example}\n"
+    )
+
+    return prompt_text
 
 
 def opt_gpt_summarise(prompt):

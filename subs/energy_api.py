@@ -3,6 +3,9 @@ import pandas as pd
 import datetime
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import seaborn as sns
+import matplotlib.dates as mdates
+import numpy as np
 from io import BytesIO
 
 
@@ -230,3 +233,99 @@ def co2_int_plot(df_):
     )  # Format min and max values as labels
     plt.tight_layout()
     return plt
+
+
+def co2_plot_trend(df_):
+    """
+    Plots the trend of CO2 intensity over time along with categorized intensity levels.
+
+    This function takes a DataFrame containing CO2 emission data, including timestamps
+    and values, and plots a trend line of emissions. It overlays this with a scatter
+    plot indicating the intensity of emissions at different times, categorized by color.
+    The x-axis is dynamically adjusted to fit the data's time range.
+
+    Parameters:
+    - df_ : pandas.DataFrame
+        The input DataFrame must contain columns for timestamps ('EffectiveTime'),
+        CO2 values ('Value'), a category column ('category'), and normalized values ('normalized').
+
+    Returns:
+    - None: Displays a matplotlib plot.
+    """
+    # Set plot style
+    sns.set_style("darkgrid", {"axes.facecolor": ".9"})
+
+    # Prepare data: reset index, convert 'EffectiveTime' to datetime, and sort
+    df = df_.reset_index(inplace=False)
+    df["EffectiveTime"] = pd.to_datetime(df["EffectiveTime"])
+    df.sort_values("EffectiveTime", inplace=True)
+    df.set_index("EffectiveTime", inplace=True)  # Set 'EffectiveTime' as index
+
+    # Format today's date for the plot title
+    today_date = datetime.datetime.now().strftime("%A %d/%m/%Y")
+
+    # Set up color mapping for CO2 values
+    norm = plt.Normalize(100, 600)  # Normalization for value intensity
+    cmap = plt.get_cmap("RdYlGn_r")  # Colormap: green to red for low to high intensity
+
+    # Create the plot with specified figure size
+    fig, ax = plt.subplots(figsize=(6, 5))
+
+    # Plot the CO2 value trend line
+    ax.plot(df.index, df["Value"], color="b", alpha=0.5, linewidth=2)
+
+    # Overlay scatter plot for CO2 value intensity
+    sc = ax.scatter(
+        df.index, df["Value"], c=df["Value"], cmap=cmap, norm=norm, edgecolor="none"
+    )
+
+    # Dynamically adjust x-axis ticks based on data range
+    total_duration_hours = (df.index.max() - df.index.min()).total_seconds() / 3600
+    interval = max(
+        1, round(total_duration_hours / 24)
+    )  # Adjust interval based on data span
+    ax.xaxis.set_major_locator(mdates.HourLocator(interval=interval))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    plt.setp(
+        ax.get_xticklabels(), rotation=45, ha="right"
+    )  # Rotate x-axis labels for readability
+
+    # Customize the colorbar to represent CO2 intensity values
+    cbar = fig.colorbar(sc, ax=ax, orientation="vertical", label="Value intensity")
+    cbar.set_ticks(np.arange(100, 600, 165))
+    cbar.set_ticklabels(["100", "300", "500", "600"])
+
+    # Create a twin y-axis for plotting normalized values by category
+    ax2 = ax.twinx()
+    ax2.set_yticks([])  # Remove y-ticks for the twin axis
+
+    # Plot categorized CO2 intensity levels
+    colors = {"Low": "green", "Medium": "orange", "High": "red"}
+    for category, color in colors.items():
+        df_cat = df[df["category"] == category]
+        ax2.scatter(
+            df_cat.index,
+            df_cat["normalized"],
+            color=color,
+            label=category,
+            alpha=0.7,
+            edgecolor="black",
+        )
+
+    ax2.set_ylim([-0.2, 5])  # Adjust y-axis limits for categorized data
+
+    # Final plot adjustments
+    ax.set_ylim([100, df["Value"].max() + 100])  # Adjust y-axis limits for CO2 values
+    ax.set_ylabel("tCO2/hr")  # Set y-axis label
+    ax.set_title(f"CO2 intensity forecast over time for {today_date}")  # Set plot title
+    ax2.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.2),
+        ncol=4,
+        frameon=True,
+        edgecolor="black",
+        title="Intensity levels determined by data trends",
+    )  # Add legend for categories
+
+    plt.tight_layout()  # Adjust layout to make room for plot elements
+    plt.show()  # Display the plot

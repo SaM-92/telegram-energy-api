@@ -87,7 +87,6 @@ async def energy_api_func(update: Update, context: CallbackContext):
         df_carbon_forecast_indexed = carbon_api_forecast()
         co2_stats_prior_day, df_carbon_intensity_recent = carbon_api_intensity()
         df_ = status_classification(df_carbon_forecast_indexed, co2_stats_prior_day)
-        # Specify the chat ID of the recipient (could be a user or a group)
         # Send the image stored in buffer
         date = str(df_.index[0])
         eu_summary_text = optimize_categorize_periods(df_)
