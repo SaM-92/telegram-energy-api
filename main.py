@@ -35,7 +35,7 @@ async def send_co2_intensity_plot(
 ):
 
     caption_text = (
-        "This visualization presents today's CO2 emission trends and intensity levels, "
+        "🎨 This visualisation presents today's CO2 emission trends and intensity levels, "
         "emphasizing expected changes over the course of the day. The blue line delineates the emission trend, accompanied by "
         "color-coded circles indicating value intensity at specific points. Additionally, colored circles positioned at the bottom "
         "of the image correspond to intensity levels at 30-minute intervals—green signifies low intensity, orange denotes medium, "
@@ -161,9 +161,13 @@ async def energy_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_first_name = update.message.from_user.first_name
-    await update.message.reply_text(
-        f"{user_first_name}!! 😃 Use the command /energy_status to kick off your inquiry!"
+    welcome_message = (
+        f"Hello, {user_first_name}! 😃 Welcome to the CleanEnergyBot, your go-to source for electricity insights in Ireland!\n\n"
+        "Use the command /energy_status to check the current energy status. You can also use /feedback to provide feedback "
+        "or /about to learn more about this bot and how it can help you make smarter energy decisions and contribute to a more sustainable future.\n\n"
+        "What would you like to do today?"
     )
+    await update.message.reply_text(welcome_message)
 
 
 # Define a custom filter function to check for documents
@@ -285,67 +289,6 @@ async def feedback_text(update: Update, context: CallbackContext) -> int:
     return ConversationHandler.END
 
 
-#  def main() -> None:
-#     """
-#     Entry point of the program.
-#     Initialises the application and sets up the handlers.
-
-#     This function creates an Application instance, sets up the conversation handlers,
-#     and starts the bot to listen for incoming messages and commands.
-#     """
-#     token = Telegram_energy_api  # os.environ.get("Telegram_energy_api")
-#     # Create the Application instance
-#     application = Application.builder().token(token).build()
-
-#     # SELECT_OPTION = 0
-#     # SELECT_OPTION, FOLLOW_UP = range(2)  # Define states
-#     # SELECT_OPTION, FOLLOW_UP, FEEDBACK = range(3)  # Correctly define states
-
-#     # Create a ConversationHandler for handling the file upload and column selection
-#     conv_handler = ConversationHandler(
-#         entry_points=[
-#             CommandHandler("start", start),
-#             CommandHandler("energy_status", energy_status),
-#             # MessageHandler(filters.Document.ALL, doc_handler),
-#         ],
-#         states={
-#             SELECT_OPTION: [
-#                 MessageHandler(filters.TEXT & ~filters.COMMAND, energy_api_func)
-#             ],
-#             FOLLOW_UP: [
-#                 MessageHandler(filters.Regex("^(Start Over)$"), start_over_handler),
-#                 MessageHandler(
-#                     filters.Regex("^(End Conversation)$"), end_conversation_handler
-#                 ),
-#                 MessageHandler(filters.Regex("^(Provide Feedback)$"), follow_up),
-#                 # Add a fallback handler within FOLLOW_UP for unexpected inputs
-#                 MessageHandler(filters.ALL, unexpected_input_handler),
-#             ],
-#             FEEDBACK: [MessageHandler(filters.TEXT & ~filters.COMMAND, feedback_text)],
-#         },
-#         fallbacks=[
-#             CommandHandler(
-#                 "cancel", cancel
-#             ),  # Allows the user to cancel the conversation
-#         ],
-#     )
-
-#     application.add_handler(conv_handler)
-#     application.add_handler(CommandHandler("start", start))  # Global handler
-#     application.add_handler(
-#         CommandHandler("energy_status", energy_status)
-#     )  # Global handler
-#     application.add_handler(CommandHandler("help", help_command))
-#     application.add_handler(CommandHandler("about", about_command))
-#     application.add_handler(CommandHandler("SocialMedia", follow_up))
-#     application.add_handler(CommandHandler("feedback", feedback_command))
-#     application.add_handler(
-#         CommandHandler("cancel", cancel)
-#     )  # Directly handle cancel command
-
-#     application.run_polling()
-
-
 def main() -> None:
     """
     Entry point of the program.
@@ -358,7 +301,7 @@ def main() -> None:
     # Create the Application instance
     application = Application.builder().token(token).build()
 
-    SELECT_OPTION, FOLLOW_UP, FEEDBACK = range(3)  # Correctly define states
+    # SELECT_OPTION, FOLLOW_UP, FEEDBACK = range(3)  # Correctly define states
 
     # Create a ConversationHandler for handling the file upload and column selection
     conv_handler = ConversationHandler(

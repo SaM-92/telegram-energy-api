@@ -118,7 +118,11 @@ def create_combined_gpt_prompt(date, eu_summary_text, quantile_summary_text):
         "📋 CO2 Emission Brief & Energy Efficiency Guide:\n\n"
         "- 🇪🇺 EU Standards Forecast: ONLY report it\n"
         "- 🔍 Data Trend Schedule: ONLY report it\n"
-        "- 💡 Energy-Saving Actions: ONLY give an example per each category of Data Trend\n"
+        f"- 💡 Energy-Saving Actions: Give an example of energy-saving actions for each category of CO2 emission trend, "
+        f"considering the current season ({date}). Examples should cover:\n"
+        "   - Low Emission Periods: [Your Example Here]\n"
+        "   - Medium Emission Periods: [Your Example Here]\n"
+        "   - High Emission Periods: [Your Example Here]\n"
     )
 
     prompt_text = (
