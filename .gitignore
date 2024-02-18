@@ -43,6 +43,5 @@ __pycache__/
 *$py.class
 
 # for workflow
-.github/workflows
 
 docker_and_azure.txt
