@@ -108,14 +108,14 @@ def find_optimized_relative_periods(df):
 def create_combined_gpt_prompt(date, eu_summary_text, quantile_summary_text):
     prompt_data = (
         f"🌍 CO2 Emissions Forecast for {date}:\n\n"
-        "1. **EU Standards Analysis 🇪🇺 **:\n"
+        "1. **EU Standards Analysis** 🇪🇺 :\n"
         f"{eu_summary_text}\n\n"
-        "2. ** Data Trend 🔍 **:\n"
+        "2. **Data Trend**: 🔍\n"
         f"{quantile_summary_text}\n\n"
     )
 
     structure_example = (
-        "📋 CO2 Emission Brief & Energy Efficiency Guide:\n"
+        "📋 CO2 Emission Brief & Energy Efficiency Guide:\n\n"
         "- 🇪🇺 EU Standards Forecast: ONLY report it\n"
         "- 🔍 Data Trend Schedule: ONLY report it\n"
         "- 💡 Energy-Saving Actions: ONLY give an example per each category of Data Trend\n"

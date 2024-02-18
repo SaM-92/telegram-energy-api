@@ -24,26 +24,37 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Define conversation states
-SELECT_OPTION = 0
+# SELECT_OPTION = 0
 TIME_COLUMN_SELECTED = 1
+# FOLLOW_UP = 0
+SELECT_OPTION, FOLLOW_UP = range(2)
 
 
 async def send_co2_intensity_plot(
     update: Update, context: ContextTypes.DEFAULT_TYPE, df_
 ):
+
+    caption_text = (
+        "CO2 Intensity Forecast: This visualization presents today's CO2 emission trends and intensity levels, "
+        "emphasizing expected changes over the course of the day. The blue line delineates the emission trend, accompanied by "
+        "color-coded circles indicating value intensity at specific points. Additionally, colored circles positioned at the bottom "
+        "of the image correspond to intensity levels at 30-minute intervals—green signifies low intensity, orange denotes medium, "
+        "and red indicates high intensity. This guide is designed to assist in planning energy usage with environmental impact in mind."
+    )
+
     chat_id = update.effective_chat.id
 
     # Call the function to generate the plot
-    plt = co2_int_plot(df_)
+    plt = co2_plot_trend(df_)
 
     # Save the plot to a BytesIO buffer
     buf = BytesIO()
-    plt.savefig(buf, format="png", facecolor="black")
+    plt.savefig(buf, format="png")
     buf.seek(0)
     plt.close()  # Make sure to close the plot to free up memory
 
     # Send the photo
-    await context.bot.send_photo(chat_id=chat_id, photo=buf)
+    await context.bot.send_photo(chat_id=chat_id, photo=buf, caption=caption_text)
 
 
 async def energy_api_func(update: Update, context: CallbackContext):
@@ -87,18 +98,20 @@ async def energy_api_func(update: Update, context: CallbackContext):
         df_carbon_forecast_indexed = carbon_api_forecast()
         co2_stats_prior_day, df_carbon_intensity_recent = carbon_api_intensity()
         df_ = status_classification(df_carbon_forecast_indexed, co2_stats_prior_day)
-        # Send the image stored in buffer
-        date = str(df_.index[0])
-        eu_summary_text = optimize_categorize_periods(df_)
-        quantile_summary_text = find_optimized_relative_periods(
-            df_
+        # data analysis & adding category per hours
+        summary_text, df_with_trend = find_optimized_relative_periods(df_)
+        today_date = df_with_trend.index[0].strftime("%d/%m/%Y")
+        eu_summary_text = optimize_categorize_periods(df_with_trend)
+        quantile_summary_text, _ = find_optimized_relative_periods(
+            df_with_trend
         )  # Generate this based on your DataFrame
+
         prompt = create_combined_gpt_prompt(
-            date, eu_summary_text, quantile_summary_text
+            today_date, eu_summary_text, quantile_summary_text
         )
         gpt_recom = opt_gpt_summarise(prompt)
         await update.message.reply_text(gpt_recom)
-        await send_co2_intensity_plot(update, context, df_)
+        await send_co2_intensity_plot(update, context, df_with_trend)
 
     else:
         await update.message.reply_text(
@@ -106,8 +119,22 @@ async def energy_api_func(update: Update, context: CallbackContext):
         )
 
     # End the conversation
-    next_state = user_data.get("next_state", ConversationHandler.END)
-    return next_state
+    # next_state = user_data.get("next_state", ConversationHandler.END)
+    # Decide the next state dynamically and store it in context.user_data
+    # context.user_data["next_state_2"] = FOLLOW_UP  # Or some other state based on logic
+    # After processing, directly inform the user of the next steps.
+    options_keyboard = [["Start Over", "End Conversation"]]
+    reply_markup = ReplyKeyboardMarkup(options_keyboard, one_time_keyboard=True)
+
+    await update.message.reply_text(
+        "We've processed your request. What would you like to do next?",
+        reply_markup=reply_markup,
+    )
+
+    # Now, instead of automatically returning FOLLOW_UP, you wait for the user's response
+    # to either 'Start Over' or 'End Conversation'.
+    # This requires handling these responses in the FOLLOW_UP state.
+    return FOLLOW_UP
 
 
 async def energy_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -175,6 +202,58 @@ async def about_command(update: Update, context: CallbackContext) -> None:
     )
 
 
+async def follow_up(update: Update, context: CallbackContext) -> int:
+    """
+    Prompt users with options for further actions after completing an operation.
+
+    This asynchronous function sends a message to users, suggesting they can either
+    restart the process by using the /start command or seek additional support through /help.
+    It signifies an open-ended pathway for users, ensuring they are not left at a dead-end
+    after an action completes.
+    """
+    await update.message.reply_text(
+        "Operation completed. Feel free to use /start to explore other functionalities or /help if you require assistance."
+    )
+    return ConversationHandler.END
+
+
+async def cancel(update: Update, context) -> int:
+    """
+    Sends a message that the conversation is canceled and ends the conversation asynchronously.
+    """
+    await update.message.reply_text(
+        "Operation canceled. Use /start to begin again or /help for more options."
+    )
+    return ConversationHandler.END
+
+
+async def start_over_handler(update: Update, context: CallbackContext) -> int:
+    # Reset state or context as needed
+    # context.user_data.clear()  # Uncomment if you want to clear user data
+
+    # Inform the user and restart the conversation
+    await update.message.reply_text(
+        "Let's start over. Use /start to kick off your inquiry!"
+    )
+    return SELECT_OPTION  # Assuming SELECT_OPTION is the initial state of your conversation
+
+
+async def end_conversation_handler(update: Update, context: CallbackContext) -> int:
+    await update.message.reply_text(
+        "Thank you for using our service. Have a great day!"
+    )
+    return ConversationHandler.END
+
+
+async def unexpected_input_handler(update: Update, context: CallbackContext) -> int:
+    # Prompt the user again with the correct options or provide help
+    await update.message.reply_text(
+        "I didn't understand that. You can choose to 'Start Over' or 'End Conversation'."
+    )
+    # Return the same state to allow the user to make a choice again
+    return FOLLOW_UP
+
+
 def main() -> None:
     """
     Entry point of the program.
@@ -187,7 +266,8 @@ def main() -> None:
     # Create the Application instance
     application = Application.builder().token(token).build()
 
-    SELECT_OPTION = 0
+    # SELECT_OPTION = 0
+    SELECT_OPTION, FOLLOW_UP = range(2)  # Define states
     # Create a ConversationHandler for handling the file upload and column selection
     conv_handler = ConversationHandler(
         entry_points=[
@@ -199,13 +279,32 @@ def main() -> None:
             SELECT_OPTION: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, energy_api_func)
             ],
+            FOLLOW_UP: [
+                MessageHandler(filters.Regex("^(Start Over)$"), start_over_handler),
+                MessageHandler(
+                    filters.Regex("^(End Conversation)$"), end_conversation_handler
+                ),
+                # Add a fallback handler within FOLLOW_UP for unexpected inputs
+                MessageHandler(filters.ALL, unexpected_input_handler),
+            ],
         },
-        fallbacks=[],
+        fallbacks=[
+            CommandHandler(
+                "cancel", cancel
+            ),  # Allows the user to cancel the conversation
+        ],
     )
 
     application.add_handler(conv_handler)
+    application.add_handler(CommandHandler("start", start))  # Global handler
+    application.add_handler(
+        CommandHandler("energy_status", energy_status)
+    )  # Global handler
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("about", about_command))
+    application.add_handler(
+        CommandHandler("cancel", cancel)
+    )  # Directly handle cancel command
 
     application.run_polling()
 

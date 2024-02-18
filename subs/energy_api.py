@@ -328,4 +328,4 @@ def co2_plot_trend(df_):
     )  # Add legend for categories
 
     plt.tight_layout()  # Adjust layout to make room for plot elements
-    plt.show()  # Display the plot
+    return plt
