@@ -34,16 +34,6 @@ TIME_COLUMN_SELECTED = 1
 SELECT_OPTION, FOLLOW_UP, FEEDBACK = range(3)
 
 
-def generate_voice(text):
-    return generate(
-        text=text,
-        voice="Callum",
-        model="eleven_multilingual_v1",
-        output_format="mp3_44100_128",
-        api_key=ELEVEN_API_KEY,
-    )
-
-
 async def send_co2_intensity_plot(
     update: Update, context: ContextTypes.DEFAULT_TYPE, df_
 ):
@@ -136,7 +126,7 @@ async def energy_api_func(update: Update, context: CallbackContext):
             summary_text, df_with_trend = find_optimized_relative_periods(df_)
             today_date = df_with_trend.index[0].strftime("%d/%m/%Y")
             eu_summary_text = optimize_categorize_periods(df_with_trend)
-            quantile_summary_text, _ = find_optimized_relative_periods(
+            quantile_summary_text, df_with_trend_ = find_optimized_relative_periods(
                 df_with_trend
             )  # Generate this based on your DataFrame
 
@@ -155,7 +145,8 @@ async def energy_api_func(update: Update, context: CallbackContext):
                 caption="Here's your energy-saving tips 🎙️",
             )
             await update.message.reply_text(gpt_recom)
-            await send_co2_intensity_plot(update, context, df_with_trend)
+            if len(df_with_trend) > 1:
+                await send_co2_intensity_plot(update, context, df_with_trend)
             del audio_msg
 
     else:

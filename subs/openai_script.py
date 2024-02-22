@@ -111,6 +111,7 @@ def find_optimized_relative_periods(df):
         summary_text = (
             "Sorry, we do not have enough data to process data trend analysis."
         )
+
     return summary_text, df
 
 
