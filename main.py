@@ -68,36 +68,16 @@ async def energy_api_func(update: Update, context: CallbackContext):
     await update.message.reply_text(
         f"""Thank you! \n 🚀 We are now processing your request and we will get back to you shortly. \n ⏱️ It takes up to 10 seconds.. """
     )
-    # Retrieve the text of the message sent by the user. This is assumed to be the column name
-    # the user has selected.
+
     user_selected_option = update.message.text
 
-    # Store the selected column name in the context's user_data dictionary.
-    # This is a way to persist user-specific data across different states of the conversation.
-    # The key 'selected_option' is used to store and later retrieve the user's choice.
     context.user_data["selected_option"] = user_selected_option
 
-    # Store the selected time column
-    # Retrieve the user_data dictionary from the context.
-    # This dictionary holds data specific to the current user and can be accessed across
-    # different states in the conversation.
     user_data = context.user_data
 
-    # Retrieve the DataFrame stored in user_data. The key 'data_frame' should have been set
-    # in a previous step of the conversation where the user uploaded their data.
-
-    # Retrieve the selected time column name from user_data.
-    # This should be the same as 'user_selected_column', and it's the column name
-    # chosen by the user for further data processing.
     selected_option_user = user_data.get("selected_option")
 
-    # # Inform the user that the time column has been selected
-    # await update.message.reply_text(
-    #     f"I understand that you have selected: {selected_option_user}"
-    # )
-
     chat_id = update.effective_chat.id
-    # Initialize variables to None or a suitable default value
 
     if selected_option_user == "Carbon intensity":
         df_carbon_forecast_indexed = None
@@ -308,12 +288,6 @@ async def feedback_command(update: Update, context: CallbackContext) -> int:
 async def feedback_text(update: Update, context: CallbackContext) -> int:
     logger.info("Entered feedback_text")
     feedback = update.message.text
-
-    # # Forward the feedback to your Telegram ID or handle it as needed
-    # your_telegram_user_id = 5118459178
-    # await context.bot.send_message(
-    #     chat_id=your_telegram_user_id, text=f"Received feedback: {feedback}"
-    # )
 
     await context.bot.forward_message(
         chat_id=CHANNEL_ID_FOR_FEEDBACK,
