@@ -130,9 +130,9 @@ def create_combined_gpt_prompt(date, eu_summary_text, quantile_summary_text):
         "- 🔍 Data Trend Schedule: ONLY report it\n"
         f"- 💡 Energy-Saving Actions: Give an example of energy-saving actions for each category of CO2 emission trend, "
         f"considering the current season ({date}). Examples should cover:\n"
-        "   - Low Emission Periods: [Your Example Here]\n"
-        "   - Medium Emission Periods: [Your Example Here]\n"
-        "   - High Emission Periods: [Your Example Here]\n"
+        "   -🟢 Low Emission Periods: [Your Example Here]\n"
+        "   -🟡 Medium Emission Periods: [Your Example Here]\n"
+        "   -🔴High Emission Periods: [Your Example Here]\n"
     )
 
     prompt_text = (
@@ -141,7 +141,7 @@ def create_combined_gpt_prompt(date, eu_summary_text, quantile_summary_text):
         "advice, utilizing specific data trends.\n\n"
         f"{prompt_data}"
         "💡 In periods of low emissions, feel free to use energy-intensive appliances without much concern for reduction.\n\n"
-        f"👉 Please use the following format for your response: \n\n {structure_example}\n"
+        f"👉 Please use the following format for your response and avoid using * in your response: \n\n {structure_example}\n"
     )
 
     return prompt_text
