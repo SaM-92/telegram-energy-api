@@ -11,6 +11,7 @@ from telegram.ext import (
     ConversationHandler,
     CallbackContext,
 )
+from elevenlabs import generate
 from subs.energy_api import *
 from subs.openai_script import *
 from dotenv import load_dotenv
@@ -20,6 +21,8 @@ from dotenv import load_dotenv
 load_dotenv()
 Telegram_energy_api = os.environ.get("Telegram_energy_api")
 CHANNEL_ID_FOR_FEEDBACK = os.environ.get("CHANNEL_ID_FOR_FEEDBACK")
+ELEVEN_API_KEY = os.environ.get("ELEVEN_API_KEY")
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -123,16 +126,28 @@ async def energy_api_func(update: Update, context: CallbackContext):
             summary_text, df_with_trend = find_optimized_relative_periods(df_)
             today_date = df_with_trend.index[0].strftime("%d/%m/%Y")
             eu_summary_text = optimize_categorize_periods(df_with_trend)
-            quantile_summary_text, _ = find_optimized_relative_periods(
+            quantile_summary_text, df_with_trend_ = find_optimized_relative_periods(
                 df_with_trend
             )  # Generate this based on your DataFrame
 
             prompt = create_combined_gpt_prompt(
                 today_date, eu_summary_text, quantile_summary_text
             )
+
+            # get generated prompt
             gpt_recom = opt_gpt_summarise(prompt)
+            # slice the energy saving actions part
+            energy_saving_actions = get_energy_actions(gpt_recom)
+            audio_msg = generate_voice(energy_saving_actions)
+            await context.bot.send_voice(
+                update.effective_chat.id,
+                audio_msg,
+                caption="Here's your energy-saving tips 🎙️",
+            )
             await update.message.reply_text(gpt_recom)
-            await send_co2_intensity_plot(update, context, df_with_trend)
+            if len(df_with_trend) > 1:
+                await send_co2_intensity_plot(update, context, df_with_trend)
+            del audio_msg
 
     else:
         await update.message.reply_text(
@@ -172,7 +187,7 @@ async def energy_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # send the list of options and ask the user to select one
     await update.message.reply_text(
-        "I'm here to help you with energy insights. Which category would you like more information about?",
+        "I'm here to help you with energy insights. Which category would you like more information about?💡🌍🔍",
         reply_markup=reply_markup,
     )
     # Set the conversation state to SELECT_COLUMN

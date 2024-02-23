@@ -6,3 +6,4 @@ requests==2.31.0
 openai==1.11.1
 python-dotenv==1.0.1
 seaborn==0.13.2
+elevenlabs==0.2.27
