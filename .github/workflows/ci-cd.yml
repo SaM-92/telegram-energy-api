@@ -37,4 +37,4 @@ jobs:
 
       - name: Deploy to Azure Container Apps
         run: |
-          az containerapp update --name mybotforenergy --resource-group botsandapps --image ${{ secrets.REGISTRY_LOGIN_SERVER }}/telegram_bot_energy_image:${{ github.sha }} --set-env-vars Telegram_energy_api='${{ secrets.Telegram_energy_api }}' CHANNEL_ID_FOR_FEEDBACK='${{ secrets.CHANNEL_ID_FOR_FEEDBACK }}' OPENAI_API_KEY='${{ secrets.OPENAI_API_KEY }}'
+          az containerapp update --name mybotforenergy --resource-group botsandapps --image ${{ secrets.REGISTRY_LOGIN_SERVER }}/telegram_bot_energy_image:${{ github.sha }} --set-env-vars Telegram_energy_api='${{ secrets.Telegram_energy_api }}' CHANNEL_ID_FOR_FEEDBACK='${{ secrets.CHANNEL_ID_FOR_FEEDBACK }}' OPENAI_API_KEY='${{ secrets.OPENAI_API_KEY }}' ELEVEN_API_KEY='${{ secrets.ELEVEN_API_KEY }}'
