@@ -45,3 +45,4 @@ __pycache__/
 # for workflow
 
 docker_and_azure.txt
+eirgrid_api.ipynb
