@@ -13,6 +13,7 @@ The CleanEnergyBot is a Telegram bot designed to empower users in Ireland with r
 - **Real-time Electricity Insights**: Provides up-to-the-minute data on electricity usage and CO2 emissions in Ireland.
 - **CO2 Emissions Forecasts**: Offers forecasts of CO2 emissions, enabling users to compare current data with past performance and EU standards.
 - **Energy Saving Recommendations**: Delivers tailored advice on the most efficient times for energy usage, helping users reduce their carbon footprint.
+- **Text-to-Speech for Energy Saving Tips**: Utilising the ElevenLabs API, the bot now sends energy-saving tips as voice messages, making it easier and more convenient for users to receive and listen to advice on the go.
 - **User Interaction**: Supports various commands for users to start conversations, receive energy status updates, give feedback, and more.
 - **Graphical Analysis**: Sends users a color-coded graphical image indicating periods of low, medium, and high carbon intensity.
 
@@ -23,7 +24,8 @@ The CleanEnergyBot was developed through a series of carefully structured steps,
 1. **Data Collection**: A Python script was created to fetch real-time and historical electricity data from EirGrid.
 2. **Data Analysis**: The fetched data are analyzed to determine CO2 emissions intensity and compliance with EU standards, categorizing them into low, medium, and high segments.
 3. **OpenAI API Integration**: Functions were developed to prepare structured prompts for the OpenAI API, facilitating the generation of reports and energy-saving tips for users.
-4. **Interactive Bot Interface**: The bot offers various interaction options, including restarting the conversation, contacting the developer, and providing feedback.
+4. **Text-to-Speech Integration**: The ElevenLabs API has been integrated to convert energy-saving tips into audio format, enhancing accessibility and user engagement.
+5. **Interactive Bot Interface**: The bot offers various interaction options, including restarting the conversation, contacting the developer, and providing feedback.
 
 ## Deployment on Azure
 
@@ -47,7 +49,8 @@ To test or contribute to CleanEnergyBot, follow these steps:
 3. **Configuration**: Securely store sensitive information and API tokens by setting them as environment variables in a .env file. Replace `your_token` with your actual tokens for each variable:
    `OPENAI_API_KEY=your token`,
    `Telegram_energy_api=your tiokne`,
-   `CHANNEL_ID_FOR_FEEDBACK=your token`
+   `CHANNEL_ID_FOR_FEEDBACK=your token`,
+   `ELEVEN_API_KEY=your token`
 
 4. **Run Locally**: Test the bot locally by running the provided application script: `python main.py`
 
