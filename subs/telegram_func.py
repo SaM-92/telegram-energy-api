@@ -79,6 +79,9 @@ async def telegram_carbon_intensity(update, context, user_first_name):
 
         # get generated prompt
         gpt_recom = opt_gpt_summarise(prompt)
+        await update.message.reply_text(gpt_recom)
+        if len(df_with_trend) > 1:
+            await send_co2_intensity_plot(update, context, df_with_trend)
         # slice the energy saving actions part
         energy_saving_actions = get_energy_actions(gpt_recom)
         audio_msg = generate_voice(energy_saving_actions)
@@ -87,9 +90,6 @@ async def telegram_carbon_intensity(update, context, user_first_name):
             audio_msg,
             caption="Here's your energy-saving tips 🎙️",
         )
-        await update.message.reply_text(gpt_recom)
-        if len(df_with_trend) > 1:
-            await send_co2_intensity_plot(update, context, df_with_trend)
         del audio_msg
 
 
@@ -141,6 +141,8 @@ async def telegram_fuel_mix(update, context, user_first_name):
     promopt_for_fuel_mix = create_fuel_mix_prompt(now, fuel_mix_eirgrid)
     fuel_mix_response_from_gpt = opt_gpt_summarise(promopt_for_fuel_mix)
 
+    await update.message.reply_text(fuel_mix_response_from_gpt)
+    await pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, now)
     audio_msg = generate_voice(fuel_mix_response_from_gpt)
 
     await context.bot.send_voice(
@@ -148,5 +150,4 @@ async def telegram_fuel_mix(update, context, user_first_name):
         audio_msg,
         caption="Here's fuel mix summary 🎙️",
     )
-    await update.message.reply_text(fuel_mix_response_from_gpt)
-    await pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, now)
+    del audio_msg
