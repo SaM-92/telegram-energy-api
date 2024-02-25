@@ -93,47 +93,6 @@ async def telegram_carbon_intensity(update, context, user_first_name):
         del audio_msg
 
 
-async def pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, current_time):
-    # Adjusting colors to be less vibrant (more pastel-like)
-    pastel_colors = {
-        "Coal": "#3B3434",  # Coal - less vibrant gray
-        "Gas": "#FF5733",  # Gas - less vibrant orange
-        "Net Import": "#8648BD",  # Net Import - less vibrant blue
-        "Other Fossil": "#F08080",  # Other Fossil - less vibrant red
-        "Renewables": "#48BD5F",  # Renewables - less vibrant green
-    }
-
-    # Mapping the pastel colors to the dataframe's FieldName
-    pastel_pie_colors = [
-        pastel_colors[field] for field in fuel_mix_eirgrid["FieldName"]
-    ]
-    custom_labels = [
-        f'{row["FieldName"]}\n({row["Percentage"]:.1f}%)'
-        for index, row in fuel_mix_eirgrid.iterrows()
-    ]
-    plt.figure(figsize=(7, 7))
-    plt.pie(
-        fuel_mix_eirgrid["Value"],
-        labels=custom_labels,
-        startangle=140,
-        colors=pastel_pie_colors,
-        wedgeprops=dict(width=0.3),
-    )
-    plt.title(f"Fuel Mix (MWh) Distribution (%)- {current_time}")
-    plt.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
-    plt.tight_layout()
-    # plt.show()
-    # Save the plot to a BytesIO buffer
-    buf = BytesIO()
-    plt.savefig(buf, format="png")
-    buf.seek(0)
-    plt.close()  # Make sure to close the plot to free up memory
-    caption_text = "📊 Explore the diversity of Ireland energy sources: from the strength of 🌿 renewables to the power of 🌬️ gas and 🪨 coal, each plays a crucial role in our energy mix. A colorful snapshot of how we power our world!"
-    # Send the photo
-    chat_id = update.effective_chat.id
-    await context.bot.send_photo(chat_id=chat_id, photo=buf, caption=caption_text)
-
-
 async def telegram_fuel_mix(update, context, user_first_name):
     fuel_mix_eirgrid = fuel_mix()
     descriptive_names = {
@@ -163,4 +122,41 @@ async def telegram_fuel_mix(update, context, user_first_name):
         caption="Here's fuel mix summary 🎙️",
     )
     await update.message.reply_text(fuel_mix_response_from_gpt)
-    await pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, now)
+    # Adjusting colors to be less vibrant (more pastel-like)
+    pastel_colors = {
+        "Coal": "#3B3434",  # Coal - less vibrant gray
+        "Gas": "#FF5733",  # Gas - less vibrant orange
+        "Net Import": "#8648BD",  # Net Import - less vibrant blue
+        "Other Fossil": "#F08080",  # Other Fossil - less vibrant red
+        "Renewables": "#48BD5F",  # Renewables - less vibrant green
+    }
+
+    # Mapping the pastel colors to the dataframe's FieldName
+    pastel_pie_colors = [
+        pastel_colors[field] for field in fuel_mix_eirgrid["FieldName"]
+    ]
+    custom_labels = [
+        f'{row["FieldName"]}\n({row["Percentage"]:.1f}%)'
+        for index, row in fuel_mix_eirgrid.iterrows()
+    ]
+    plt.figure(figsize=(7, 7))
+    plt.pie(
+        fuel_mix_eirgrid["Value"],
+        labels=custom_labels,
+        startangle=140,
+        colors=pastel_pie_colors,
+        wedgeprops=dict(width=0.3),
+    )
+    plt.title(f"Fuel Mix (MWh) Distribution (%)- {now}")
+    plt.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
+    plt.tight_layout()
+    # plt.show()
+    # Save the plot to a BytesIO buffer
+    buf = BytesIO()
+    plt.savefig(buf, format="png")
+    buf.seek(0)
+    plt.close()  # Make sure to close the plot to free up memory
+    caption_text = "test"
+    # Send the photo
+    chat_id = update.effective_chat.id
+    await context.bot.send_photo(chat_id=chat_id, photo=buf, caption=caption_text)

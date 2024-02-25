@@ -93,7 +93,7 @@ async def telegram_carbon_intensity(update, context, user_first_name):
         del audio_msg
 
 
-async def pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, current_time):
+async def pie_chart_fuel_mix():
     # Adjusting colors to be less vibrant (more pastel-like)
     pastel_colors = {
         "Coal": "#3B3434",  # Coal - less vibrant gray
@@ -119,7 +119,7 @@ async def pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, current_time):
         colors=pastel_pie_colors,
         wedgeprops=dict(width=0.3),
     )
-    plt.title(f"Fuel Mix (MWh) Distribution (%)- {current_time}")
+    plt.title(f"Fuel Mix (MWh) Distribution (%)- {now}")
     plt.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
     plt.tight_layout()
     # plt.show()
@@ -128,7 +128,7 @@ async def pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, current_time):
     plt.savefig(buf, format="png")
     buf.seek(0)
     plt.close()  # Make sure to close the plot to free up memory
-    caption_text = "📊 Explore the diversity of Ireland energy sources: from the strength of 🌿 renewables to the power of 🌬️ gas and 🪨 coal, each plays a crucial role in our energy mix. A colorful snapshot of how we power our world!"
+    caption_text = "test"
     # Send the photo
     chat_id = update.effective_chat.id
     await context.bot.send_photo(chat_id=chat_id, photo=buf, caption=caption_text)
@@ -163,4 +163,3 @@ async def telegram_fuel_mix(update, context, user_first_name):
         caption="Here's fuel mix summary 🎙️",
     )
     await update.message.reply_text(fuel_mix_response_from_gpt)
-    await pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, now)
