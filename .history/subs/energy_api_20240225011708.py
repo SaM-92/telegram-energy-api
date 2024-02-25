@@ -33,18 +33,6 @@ def eirgrid_api(area, region, start_time, end_time):
     return pd.DataFrame(Rows)
 
 
-# Function to round time to the nearest 15 minutes
-def round_time(dt):
-    # Round minutes to the nearest 15
-    new_minute = (dt.minute // 15) * 15
-    return dt.replace(minute=new_minute, second=0, microsecond=0)
-
-
-# Function to format date in a specific format
-def format_date(dt):
-    return dt.strftime("%d-%b-%Y").lower() + "+" + dt.strftime("%H%%3A%M")
-
-
 def carbon_api_forecast():
     # data is availble every 30 minutes, so we need to start at the nearest half-hour
     def round_down_time(dt):
@@ -105,6 +93,16 @@ def carbon_api_forecast():
 
 
 def carbon_api_intensity():
+    # Function to round time to the nearest 15 minutes
+    def round_time(dt):
+        # Round minutes to the nearest 15
+        new_minute = (dt.minute // 15) * 15
+        return dt.replace(minute=new_minute, second=0, microsecond=0)
+
+    # Function to format date in your specific format
+    def format_date(dt):
+        return dt.strftime("%d-%b-%Y").lower() + "+" + dt.strftime("%H%%3A%M")
+
     try:
         # Current date and time, rounded to the nearest 15 minutes
         now = round_time(datetime.datetime.now())
@@ -155,25 +153,6 @@ def carbon_api_intensity():
     except Exception as e:
         # Return None or an error message to indicate failure
         return None, None
-
-
-def fuel_mix():
-    try:
-        # Current date and time, rounded to the nearest 15 minutes
-        now = round_time(datetime.datetime.now())
-
-        # Start time (same time yesterday, rounded to the nearest 15 minutes)
-        yesterday = now - datetime.timedelta(days=1)
-        startDateTime = format_date(yesterday)
-
-        # End time (current time, rounded to the nearest 15 minutes)
-        endDateTime = format_date(now)
-
-        # call API to get fuel mix for current time
-        fuel_mix_eirgrid = eirgrid_api("fuelMix", "ALL", startDateTime, startDateTime)
-        return fuel_mix_eirgrid
-    except:
-        return None
 
 
 def classify_status(value, min_val, max_val):

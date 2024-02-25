@@ -170,8 +170,9 @@ def fuel_mix():
         endDateTime = format_date(now)
 
         # call API to get fuel mix for current time
-        fuel_mix_eirgrid = eirgrid_api("fuelMix", "ALL", startDateTime, startDateTime)
-        return fuel_mix_eirgrid
+        df_carbon_intensity_day_before = eirgrid_api(
+            "fuelMix", "ALL", startDateTime, startDateTime
+        )
     except:
         return None
 
