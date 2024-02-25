@@ -173,16 +173,14 @@ def fuel_mix():
         fuel_mix_eirgrid = eirgrid_api("fuelMix", "ALL", startDateTime, startDateTime)
 
         descriptive_names = {
-            "FUEL_COAL": "Coal",
-            "FUEL_GAS": "Gas",
-            "FUEL_NET_IMPORT": "Net Import",
-            "FUEL_OTHER_FOSSIL": "Other Fossil",
-            "FUEL_RENEW": "Renewables",
-        }
+    "FUEL_COAL": "Coal",
+    "FUEL_GAS": "Gas",
+    "FUEL_NET_IMPORT": "Net Import",
+    "FUEL_OTHER_FOSSIL": "Other Fossil",
+    "FUEL_RENEW": "Renewables"
+}
 
-        fuel_mix_eirgrid["FieldName"] = fuel_mix_eirgrid["FieldName"].map(
-            descriptive_names
-        )
+    fuel_mix_eirgrid['FieldName'] = fuel_mix_eirgrid['FieldName'].map(descriptive_names)
         return fuel_mix_eirgrid
     except:
         return None

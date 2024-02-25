@@ -156,8 +156,9 @@ async def energy_api_func(update: Update, context: CallbackContext):
 async def energy_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_first_name = update.message.from_user.first_name
     options = [
-        "Carbon intensity",
-        "Fuel mix",
+        "Carbon intensity"
+        # ,
+        # "Renewable energy status [Under Deveoplment]",
         # "Price of electricity (wholesale market) [Under Deveoplment]",
     ]
     # Create a custom keyboard with the column names
