@@ -8,7 +8,11 @@ The CleanEnergyBot is a Telegram bot designed to empower users in Ireland with r
 
 <!-- [🎥 Watch the video on how to use the bot](https://www.youtube.com/watch?v=qxA-Xx5oGXI) -->
 
-[![🎥 Watch the video on how to use the bot](/images/video_thumbnail.gif)](https://www.youtube.com/watch?v=qxA-Xx5oGXI)
+## 🎥 Watch the video on how to use the bot
+
+[🎥 Link](https://www.youtube.com/watch?v=qxA-Xx5oGXI)
+
+[![🎥 Watch the video on how to use the bot](/images/video_thumbnail.jpg)](https://www.youtube.com/watch?v=qxA-Xx5oGXI)
 
 ## Features
 
