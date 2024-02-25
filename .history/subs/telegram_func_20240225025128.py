@@ -136,6 +136,16 @@ async def pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, current_time):
 
 async def telegram_fuel_mix(update, context, user_first_name):
     fuel_mix_eirgrid = fuel_mix()
+    descriptive_names = {
+        "FUEL_COAL": "Coal",
+        "FUEL_GAS": "Gas",
+        "FUEL_NET_IMPORT": "Net Import",
+        "FUEL_OTHER_FOSSIL": "Other Fossil",
+        "FUEL_RENEW": "Renewables",
+    }
+
+    fuel_mix_eirgrid["FieldName"] = fuel_mix_eirgrid["FieldName"].map(descriptive_names)
+
     total = sum(fuel_mix_eirgrid["Value"])
     percentages = [(value / total) * 100 for value in fuel_mix_eirgrid["Value"]]
     fuel_mix_eirgrid["Percentage"] = percentages

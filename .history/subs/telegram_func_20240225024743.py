@@ -102,7 +102,7 @@ async def pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, current_time):
         "Other Fossil": "#F08080",  # Other Fossil - less vibrant red
         "Renewables": "#48BD5F",  # Renewables - less vibrant green
     }
-    print(fuel_mix_eirgrid)
+    print(fuel_mix_eirgrid["FieldName"])
     # Mapping the pastel colors to the dataframe's FieldName
     pastel_pie_colors = [
         pastel_colors[field] for field in fuel_mix_eirgrid["FieldName"]
@@ -136,6 +136,16 @@ async def pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, current_time):
 
 async def telegram_fuel_mix(update, context, user_first_name):
     fuel_mix_eirgrid = fuel_mix()
+    descriptive_names = {
+        "FUEL_COAL": "Coal",
+        "FUEL_GAS": "Gas",
+        "FUEL_NET_IMPORT": "Net Import",
+        "FUEL_OTHER_FOSSIL": "Other Fossil",
+        "FUEL_RENEW": "Renewables",
+    }
+
+    fuel_mix_eirgrid["FieldName"] = fuel_mix_eirgrid["FieldName"].map(descriptive_names)
+
     total = sum(fuel_mix_eirgrid["Value"])
     percentages = [(value / total) * 100 for value in fuel_mix_eirgrid["Value"]]
     fuel_mix_eirgrid["Percentage"] = percentages
@@ -143,15 +153,14 @@ async def telegram_fuel_mix(update, context, user_first_name):
     now = round_time(datetime.datetime.now())
 
     promopt_for_fuel_mix = create_fuel_mix_prompt(now, fuel_mix_eirgrid)
-    # fuel_mix_response_from_gpt = opt_gpt_summarise(promopt_for_fuel_mix)
+    fuel_mix_response_from_gpt = opt_gpt_summarise(promopt_for_fuel_mix)
 
-    # audio_msg = generate_voice(fuel_mix_response_from_gpt)
+    audio_msg = generate_voice(fuel_mix_response_from_gpt)
 
-    # await context.bot.send_voice(
-    #     update.effective_chat.id,
-    #     audio_msg,
-    #     caption="Here's fuel mix summary 🎙️",
-    # )
-    # await update.message.reply_text(fuel_mix_response_from_gpt)
-    # await update.message.reply_text(fuel_mix_eirgrid)
+    await context.bot.send_voice(
+        update.effective_chat.id,
+        audio_msg,
+        caption="Here's fuel mix summary 🎙️",
+    )
+    await update.message.reply_text(fuel_mix_response_from_gpt)
     await pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, now)
