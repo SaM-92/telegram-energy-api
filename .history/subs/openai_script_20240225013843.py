@@ -179,7 +179,7 @@ def opt_gpt_summarise(prompt):
 
 
 def get_energy_actions(text):
-    start_keyword = "💡 Energy-Saving Actions"
+    start_keyword = "- 💡 Energy-Saving Actions:"
     end_keywords = [
         "📋",
         "- 🇪🇺",
