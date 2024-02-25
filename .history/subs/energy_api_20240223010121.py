@@ -339,6 +339,3 @@ def co2_plot_trend(df_):
 
     plt.tight_layout()  # Adjust layout to make room for plot elements
     return plt
-
-def fuel_mix_eirgrid():
-    
