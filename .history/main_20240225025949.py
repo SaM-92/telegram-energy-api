@@ -56,9 +56,9 @@ async def energy_api_func(update: Update, context: CallbackContext):
 
     chat_id = update.effective_chat.id
 
-    if selected_option_user == "🌍 Carbon intensity":
+    if selected_option_user == "Carbon intensity":
         await telegram_carbon_intensity(update, context, user_first_name)
-    elif selected_option_user == "🔋 Fuel mix":
+    if selected_option_user == "Fuel mix":
         await telegram_fuel_mix(update, context, user_first_name)
     else:
         await update.message.reply_text(
@@ -73,6 +73,9 @@ async def energy_api_func(update: Update, context: CallbackContext):
         reply_markup=reply_markup,
     )
 
+    # Now, instead of automatically returning FOLLOW_UP, you wait for the user's response
+    # to either 'Start Over' or 'End Conversation'.
+    # This requires handling these responses in the FOLLOW_UP state.
     return FOLLOW_UP
 
 

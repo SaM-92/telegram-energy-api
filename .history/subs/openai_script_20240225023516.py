@@ -205,8 +205,8 @@ def create_fuel_mix_prompt(date, fuel_mix_data):
     # Correcting the list comprehension to match the data structure
     fuel_mix_details = "\n".join(
         [
-            f"- {fuel_mix_data['FieldName'][i]}: {fuel_mix_data['Value'][i]} MWh ({fuel_mix_data['Percentage'][i]:.1f}%)"
-            for i in range(len(fuel_mix_data["FieldName"]))
+            f"- {fuel_mix_eirgrid['FieldName'][i]}: {fuel_mix_eirgrid['Value'][i]} MWh ({fuel_mix_eirgrid['Percentage'][i]:.1f}%)"
+            for i in range(len(fuel_mix_eirgrid["FieldName"]))
         ]
     )
 

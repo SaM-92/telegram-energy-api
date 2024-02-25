@@ -6,16 +6,23 @@ The CleanEnergyBot is a Telegram bot designed to empower users in Ireland with r
 
 ![Real-time Data Scraping Diagram](/images/overview.png)
 
-[🎥 Watch the video on how to use the bot](https://www.youtube.com/watch?v=qxA-Xx5oGXI)
+<!-- [🎥 Watch the video on how to use the bot](https://www.youtube.com/watch?v=qxA-Xx5oGXI) -->
+
+## 🎥 Watch the video on how to use the bot
+
+[🎥 Link](https://www.youtube.com/watch?v=qxA-Xx5oGXI)
+
+[![Watch the video](/images/video_thumbnail.gif)](https://www.youtube.com/watch?v=qxA-Xx5oGXI)
 
 ## Features
 
 - **Real-time Electricity Insights**: Provides up-to-the-minute data on electricity usage and CO2 emissions in Ireland.
 - **CO2 Emissions Forecasts**: Offers forecasts of CO2 emissions, enabling users to compare current data with past performance and EU standards.
 - **Energy Saving Recommendations**: Delivers tailored advice on the most efficient times for energy usage, helping users reduce their carbon footprint.
+- **Fuel Mix Insights**: Delivers detailed information on the current mix of fuel sources powering the electricity grid, including renewables, gas, coal, and other sources. This feature helps users understand the environmental impact of their electricity consumption and the role of renewable energy in the grid.
 - **Text-to-Speech for Energy Saving Tips**: Utilising the ElevenLabs API, the bot now sends energy-saving tips as voice messages, making it easier and more convenient for users to receive and listen to advice on the go.
 - **User Interaction**: Supports various commands for users to start conversations, receive energy status updates, give feedback, and more.
-- **Graphical Analysis**: Sends users a color-coded graphical image indicating periods of low, medium, and high carbon intensity.
+- **Graphical Analysis**: Sends users colour-coded graphical images indicating periods of low, medium, and high carbon intensity, as well as pie charts visualizing the current fuel mix.
 
 ## Development
 

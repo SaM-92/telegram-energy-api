@@ -14,10 +14,7 @@ from telegram.ext import (
 from elevenlabs import generate
 from subs.energy_api import *
 from subs.openai_script import *
-from subs.telegram_func import (
-    telegram_carbon_intensity,
-    telegram_fuel_mix,
-)
+from subs.telegram_func import send_co2_intensity_plot, telegram_carbon_intensity
 from dotenv import load_dotenv
 
 # add vars to azure
@@ -56,9 +53,9 @@ async def energy_api_func(update: Update, context: CallbackContext):
 
     chat_id = update.effective_chat.id
 
-    if selected_option_user == "🌍 Carbon intensity":
+    if selected_option_user == "Carbon intensity":
         await telegram_carbon_intensity(update, context, user_first_name)
-    elif selected_option_user == "🔋 Fuel mix":
+    if selected_option_user == "Fuel mix":
         await telegram_fuel_mix(update, context, user_first_name)
     else:
         await update.message.reply_text(
@@ -73,17 +70,19 @@ async def energy_api_func(update: Update, context: CallbackContext):
         reply_markup=reply_markup,
     )
 
+    # Now, instead of automatically returning FOLLOW_UP, you wait for the user's response
+    # to either 'Start Over' or 'End Conversation'.
+    # This requires handling these responses in the FOLLOW_UP state.
     return FOLLOW_UP
 
 
 async def energy_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_first_name = update.message.from_user.first_name
     options = [
-        "🌍 Carbon intensity",
-        "🔋 Fuel mix",
-        # "💸 Price of electricity (wholesale market) [Under Development]",
+        "Carbon intensity",
+        "Fuel mix",
+        # "Price of electricity (wholesale market) [Under Deveoplment]",
     ]
-
     # Create a custom keyboard with the column names
     keyboard = [[option] for option in options]
     reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)

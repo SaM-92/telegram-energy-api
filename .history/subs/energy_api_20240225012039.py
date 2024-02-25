@@ -170,23 +170,9 @@ def fuel_mix():
         endDateTime = format_date(now)
 
         # call API to get fuel mix for current time
-        fuel_mix_eirgrid = eirgrid_api("fuelMix", "ALL", startDateTime, startDateTime)
-
-        descriptive_names = {
-            "FUEL_COAL": "Coal",
-            "FUEL_GAS": "Gas",
-            "FUEL_NET_IMPORT": "Net Import",
-            "FUEL_OTHER_FOSSIL": "Other Fossil",
-            "FUEL_RENEW": "Renewables",
-        }
-
-        fuel_mix_eirgrid["FieldName"] = fuel_mix_eirgrid["FieldName"].map(
-            descriptive_names
+        df_carbon_intensity_day_before = eirgrid_api(
+            "fuelMix", "ALL", startDateTime, startDateTime
         )
-        total = sum(fuel_mix_eirgrid["Value"])
-        percentages = [(value / total) * 100 for value in fuel_mix_eirgrid["Value"]]
-        fuel_mix_eirgrid["Percentage"] = percentages
-        return fuel_mix_eirgrid
     except:
         return None
 

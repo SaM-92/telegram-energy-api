@@ -32,18 +32,15 @@ def eirgrid_api(area, region, start_time, end_time):
 
     return pd.DataFrame(Rows)
 
-
 # Function to round time to the nearest 15 minutes
 def round_time(dt):
     # Round minutes to the nearest 15
     new_minute = (dt.minute // 15) * 15
     return dt.replace(minute=new_minute, second=0, microsecond=0)
 
-
 # Function to format date in a specific format
 def format_date(dt):
     return dt.strftime("%d-%b-%Y").lower() + "+" + dt.strftime("%H%%3A%M")
-
 
 def carbon_api_forecast():
     # data is availble every 30 minutes, so we need to start at the nearest half-hour
@@ -170,26 +167,9 @@ def fuel_mix():
         endDateTime = format_date(now)
 
         # call API to get fuel mix for current time
-        fuel_mix_eirgrid = eirgrid_api("fuelMix", "ALL", startDateTime, startDateTime)
-
-        descriptive_names = {
-            "FUEL_COAL": "Coal",
-            "FUEL_GAS": "Gas",
-            "FUEL_NET_IMPORT": "Net Import",
-            "FUEL_OTHER_FOSSIL": "Other Fossil",
-            "FUEL_RENEW": "Renewables",
-        }
-
-        fuel_mix_eirgrid["FieldName"] = fuel_mix_eirgrid["FieldName"].map(
-            descriptive_names
+        df_carbon_intensity_day_before = eirgrid_api(
+            "fuelMix", "ALL", startDateTime, startDateTime
         )
-        total = sum(fuel_mix_eirgrid["Value"])
-        percentages = [(value / total) * 100 for value in fuel_mix_eirgrid["Value"]]
-        fuel_mix_eirgrid["Percentage"] = percentages
-        return fuel_mix_eirgrid
-    except:
-        return None
-
 
 def classify_status(value, min_val, max_val):
     if value < min_val:

@@ -179,7 +179,7 @@ def opt_gpt_summarise(prompt):
 
 
 def get_energy_actions(text):
-    start_keyword = "💡 Energy-Saving Actions"
+    start_keyword = "- 💡 Energy-Saving Actions:"
     end_keywords = [
         "📋",
         "- 🇪🇺",
@@ -198,36 +198,6 @@ def get_energy_actions(text):
     # Extract the section
     energy_saving_actions = text[start_pos:end_pos].strip()
     return energy_saving_actions
-
-
-def create_fuel_mix_prompt(date, fuel_mix_data):
-    # Preparing fuel mix data string
-    # Correcting the list comprehension to match the data structure
-    fuel_mix_details = "\n".join(
-        [
-            f"- {fuel_mix_data['FieldName'][i]}: {fuel_mix_data['Value'][i]} MWh ({fuel_mix_data['Percentage'][i]:.1f}%)"
-            for i in range(len(fuel_mix_data["FieldName"]))
-        ]
-    )
-
-    prompt_text = (
-        f"📅 Date: {date}\n"
-        f"🔋 Fuel Mix Data (MWh & Percentage):\n\n"
-        f"{fuel_mix_details}\n\n"
-        "Based on the above data, write a short report about the current status of the energy system. "
-        "Please summarize the contribution of each fuel source to the overall mix and any notable trends. "
-        "Use the following structure for your response, incorporating the specified emojis to highlight each fuel source:\n\n"
-        "📋 Fuel Mix Status:\n"
-        "- 🪨 Coal: [percentage]%\n"
-        "- 🌬️ Gas: [percentage]%\n"
-        "- ⚡ Net Import: [percentage]%\n"
-        "- 🛢️ Other Fossil: [percentage]%\n"
-        "- 🌿 Renewables: [percentage]%\n\n"
-        "Note: Replace [percentage] with the actual percentages from the data. "
-        "Avoid using asterisks (*) in your response and stick to the names and format provided."
-    )
-
-    return prompt_text
 
 
 def generate_voice(text):

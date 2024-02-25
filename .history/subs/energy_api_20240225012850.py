@@ -183,9 +183,6 @@ def fuel_mix():
         fuel_mix_eirgrid["FieldName"] = fuel_mix_eirgrid["FieldName"].map(
             descriptive_names
         )
-        total = sum(fuel_mix_eirgrid["Value"])
-        percentages = [(value / total) * 100 for value in fuel_mix_eirgrid["Value"]]
-        fuel_mix_eirgrid["Percentage"] = percentages
         return fuel_mix_eirgrid
     except:
         return None
