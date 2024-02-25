@@ -160,5 +160,4 @@ async def telegram_fuel_mix(update, context, user_first_name):
     plt.close()  # Make sure to close the plot to free up memory
     caption_text = "test"
     # Send the photo
-    chat_id = update.effective_chat.id
     await context.bot.send_photo(chat_id=chat_id, photo=buf, caption=caption_text)

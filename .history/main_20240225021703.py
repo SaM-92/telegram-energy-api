@@ -14,10 +14,7 @@ from telegram.ext import (
 from elevenlabs import generate
 from subs.energy_api import *
 from subs.openai_script import *
-from subs.telegram_func import (
-    telegram_carbon_intensity,
-    telegram_fuel_mix,
-)
+from subs.telegram_func import send_co2_intensity_plot, telegram_carbon_intensity
 from dotenv import load_dotenv
 
 # add vars to azure

@@ -153,12 +153,3 @@ async def telegram_fuel_mix(update, context, user_first_name):
     plt.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
     plt.tight_layout()
     # plt.show()
-    # Save the plot to a BytesIO buffer
-    buf = BytesIO()
-    plt.savefig(buf, format="png")
-    buf.seek(0)
-    plt.close()  # Make sure to close the plot to free up memory
-    caption_text = "test"
-    # Send the photo
-    chat_id = update.effective_chat.id
-    await context.bot.send_photo(chat_id=chat_id, photo=buf, caption=caption_text)

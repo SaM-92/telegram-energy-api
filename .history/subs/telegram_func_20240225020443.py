@@ -93,7 +93,7 @@ async def telegram_carbon_intensity(update, context, user_first_name):
         del audio_msg
 
 
-async def telegram_fuel_mix(update, context, user_first_name):
+def telegram_fuel_mix(update, context, user_first_name):
     fuel_mix_eirgrid = fuel_mix()
     descriptive_names = {
         "FUEL_COAL": "Coal",
@@ -114,51 +114,3 @@ async def telegram_fuel_mix(update, context, user_first_name):
     promopt_for_fuel_mix = create_fuel_mix_prompt(
         now, fuel_mix_eirgrid[["FieldName", "Value", "Percentage"]].to_dict()
     )
-    fuel_mix_response_from_gpt = opt_gpt_summarise(promopt_for_fuel_mix)
-
-    audio_msg = generate_voice(fuel_mix_response_from_gpt)
-
-    await context.bot.send_voice(
-        update.effective_chat.id,
-        audio_msg,
-        caption="Here's fuel mix summary 🎙️",
-    )
-    await update.message.reply_text(fuel_mix_response_from_gpt)
-    # Adjusting colors to be less vibrant (more pastel-like)
-    pastel_colors = {
-        "Coal": "#3B3434",  # Coal - less vibrant gray
-        "Gas": "#FF5733",  # Gas - less vibrant orange
-        "Net Import": "#8648BD",  # Net Import - less vibrant blue
-        "Other Fossil": "#F08080",  # Other Fossil - less vibrant red
-        "Renewables": "#48BD5F",  # Renewables - less vibrant green
-    }
-
-    # Mapping the pastel colors to the dataframe's FieldName
-    pastel_pie_colors = [
-        pastel_colors[field] for field in fuel_mix_eirgrid["FieldName"]
-    ]
-    custom_labels = [
-        f'{row["FieldName"]}\n({row["Percentage"]:.1f}%)'
-        for index, row in fuel_mix_eirgrid.iterrows()
-    ]
-    plt.figure(figsize=(7, 7))
-    plt.pie(
-        fuel_mix_eirgrid["Value"],
-        labels=custom_labels,
-        startangle=140,
-        colors=pastel_pie_colors,
-        wedgeprops=dict(width=0.3),
-    )
-    plt.title(f"Fuel Mix (MWh) Distribution (%)- {now}")
-    plt.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
-    plt.tight_layout()
-    # plt.show()
-    # Save the plot to a BytesIO buffer
-    buf = BytesIO()
-    plt.savefig(buf, format="png")
-    buf.seek(0)
-    plt.close()  # Make sure to close the plot to free up memory
-    caption_text = "test"
-    # Send the photo
-    chat_id = update.effective_chat.id
-    await context.bot.send_photo(chat_id=chat_id, photo=buf, caption=caption_text)
