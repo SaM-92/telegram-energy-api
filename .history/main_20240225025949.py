@@ -56,9 +56,9 @@ async def energy_api_func(update: Update, context: CallbackContext):
 
     chat_id = update.effective_chat.id
 
-    if selected_option_user == "🌍 Carbon intensity":
+    if selected_option_user == "Carbon intensity":
         await telegram_carbon_intensity(update, context, user_first_name)
-    if selected_option_user == "🔋 Fuel mix":
+    if selected_option_user == "Fuel mix":
         await telegram_fuel_mix(update, context, user_first_name)
     else:
         await update.message.reply_text(
