@@ -135,8 +135,13 @@ async def pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, current_time):
 
 
 async def telegram_fuel_mix(update, context, user_first_name):
-    fuel_mix_eirgrid = fuel_mix()
+    fuel_mix_eirgrid, net_import_status = fuel_mix()
     now = round_time(datetime.datetime.now())
+
+    if net_import_status =='export':
+        
+    else:
+
 
     promopt_for_fuel_mix = create_fuel_mix_prompt(now, fuel_mix_eirgrid)
     fuel_mix_response_from_gpt = opt_gpt_summarise(promopt_for_fuel_mix)

@@ -183,10 +183,25 @@ def fuel_mix():
         fuel_mix_eirgrid["FieldName"] = fuel_mix_eirgrid["FieldName"].map(
             descriptive_names
         )
-        total = sum(fuel_mix_eirgrid["Value"])
-        percentages = [(value / total) * 100 for value in fuel_mix_eirgrid["Value"]]
+        fuel_mix_eirgrid["ValueForPercentage"] = fuel_mix_eirgrid["Value"].apply(
+            lambda x: max(x, 0)
+        )
+        total_for_percentage = sum(fuel_mix_eirgrid["ValueForPercentage"])
+        percentages = [
+            (value / total_for_percentage) * 100 if value > 0 else 0
+            for value in fuel_mix_eirgrid["ValueForPercentage"]
+        ]
         fuel_mix_eirgrid["Percentage"] = percentages
-        return fuel_mix_eirgrid
+        if (
+            fuel_mix_eirgrid.loc[
+                fuel_mix_eirgrid["FieldName"] == "Net Import", "Value"
+            ].values[0]
+            < 0
+        ):
+            net_import = "export"
+        else:
+            net_import = "importing"
+        return fuel_mix_eirgrid, net_import
     except:
         return None
 
