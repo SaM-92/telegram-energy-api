@@ -93,7 +93,8 @@ async def telegram_carbon_intensity(update, context, user_first_name):
         del audio_msg
 
 
-async def pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, current_time):
+async def pie_chart_fuel_mix(update, context, df, net_import_status, current_time):
+
     # Adjusting colors to be less vibrant (more pastel-like)
     pastel_colors = {
         "Coal": "#3B3434",  # Coal - less vibrant gray
@@ -104,16 +105,23 @@ async def pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, current_time):
     }
     # print(fuel_mix_eirgrid)
     # Mapping the pastel colors to the dataframe's FieldName
-    pastel_pie_colors = [
-        pastel_colors[field] for field in fuel_mix_eirgrid["FieldName"]
-    ]
+    pastel_pie_colors = [pastel_colors[field] for field in df["FieldName"]]
+    # Filter df based on net_import_status
+    if net_import_status == "importing":
+        pie_data = df
+    elif net_import_status == "exporting":
+        pie_data = df[df["FieldName"] != "Net Import"]
+        # Update pastel_pie_colors to match the filtered data
+        pastel_pie_colors = [pastel_colors[field] for field in pie_data["FieldName"]]
+
+    # Generate custom_labels from the (potentially filtered) pie_data
     custom_labels = [
         f'{row["FieldName"]}\n({row["Percentage"]:.1f}%)'
-        for index, row in fuel_mix_eirgrid.iterrows()
+        for index, row in pie_data.iterrows()
     ]
     plt.figure(figsize=(7, 7))
     plt.pie(
-        fuel_mix_eirgrid["Value"],
+        pie_data["Percentage"],
         labels=custom_labels,
         startangle=140,
         colors=pastel_pie_colors,
@@ -135,14 +143,16 @@ async def pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, current_time):
 
 
 async def telegram_fuel_mix(update, context, user_first_name):
-    fuel_mix_eirgrid = fuel_mix()
+    fuel_mix_eirgrid, net_import_status = fuel_mix()
     now = round_time(datetime.datetime.now())
 
-    promopt_for_fuel_mix = create_fuel_mix_prompt(now, fuel_mix_eirgrid)
+    promopt_for_fuel_mix = create_fuel_mix_prompt(
+        now, fuel_mix_eirgrid, net_import_status
+    )
     fuel_mix_response_from_gpt = opt_gpt_summarise(promopt_for_fuel_mix)
 
     await update.message.reply_text(fuel_mix_response_from_gpt)
-    await pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, now)
+    await pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, net_import_status, now)
     audio_msg = generate_voice(fuel_mix_response_from_gpt)
 
     await context.bot.send_voice(

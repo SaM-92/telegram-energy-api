@@ -200,32 +200,63 @@ def get_energy_actions(text):
     return energy_saving_actions
 
 
-def create_fuel_mix_prompt(date, fuel_mix_data):
+def create_fuel_mix_prompt(date, fuel_mix_data, net_import_status):
     # Preparing fuel mix data string
     # Correcting the list comprehension to match the data structure
-    fuel_mix_details = "\n".join(
-        [
-            f"- {fuel_mix_data['FieldName'][i]}: {fuel_mix_data['Value'][i]} MWh ({fuel_mix_data['Percentage'][i]:.1f}%)"
-            for i in range(len(fuel_mix_data["FieldName"]))
-        ]
-    )
 
-    prompt_text = (
-        f"📅 Date: {date}\n"
-        f"🔋 Fuel Mix Data (MWh & Percentage):\n\n"
-        f"{fuel_mix_details}\n\n"
-        "Based on the above data, write a short report about the current status of the energy system. "
-        "Please summarize the contribution of each fuel source to the overall mix and any notable trends. "
-        "Use the following structure for your response, incorporating the specified emojis to highlight each fuel source:\n\n"
-        "📋 Fuel Mix Status:\n"
-        "- 🪨 Coal: [percentage]%\n"
-        "- 🌬️ Gas: [percentage]%\n"
-        "- ⚡ Net Import: [percentage]%\n"
-        "- 🛢️ Other Fossil: [percentage]%\n"
-        "- 🌿 Renewables: [percentage]%\n\n"
-        "Note: Replace [percentage] with the actual percentages from the data. "
-        "Avoid using asterisks (*) in your response and stick to the names and format provided."
-    )
+    if net_import_status == "importing":
+        fuel_mix_details = "\n".join(
+            [
+                f"- {fuel_mix_data['FieldName'][i]}: {fuel_mix_data['Value'][i]} MWh ({fuel_mix_data['Percentage'][i]:.1f}%)"
+                for i in range(len(fuel_mix_data["FieldName"]))
+            ]
+        )
+        prompt_text = (
+            f"📅 Date: {date}\n"
+            f"🔋 Fuel Mix Data (MWh & Percentage):\n\n"
+            f"{fuel_mix_details}\n\n"
+            "Based on the above data, write a short report about the status of the energy system over the last 24 hours. "
+            "Please summarize the contribution of each fuel source to the overall mix and any notable trends. "
+            "Use the following structure for your response, incorporating the specified emojis to highlight each fuel source:\n\n"
+            "📋 Fuel Mix Status:\n"
+            "- 🪨 Coal: [percentage]%\n"
+            "- 🌬️ Gas: [percentage]%\n"
+            "- ⚡ Net Import: [percentage]%\n"
+            "- 🛢️ Other Fossil: [percentage]%\n"
+            "- 🌿 Renewables: [percentage]%\n\n"
+            "Note: Replace [percentage] with the actual percentages from the data. "
+            "Avoid using asterisks (*) in your response and stick to the names and format provided."
+        )
+    elif net_import_status == "exporting":
+        export_value = fuel_mix_data.loc[
+            fuel_mix_data["FieldName"] == "Net Import", "Value"
+        ].values[0]
+        filtered_fuel_mix_data = fuel_mix_data[
+            fuel_mix_data["FieldName"] != "Net Import"
+        ]
+        fuel_mix_details = "\n".join(
+            [
+                f"- {filtered_fuel_mix_data['FieldName'][idx]}: {filtered_fuel_mix_data['Value'][idx]} MWh ({filtered_fuel_mix_data['Percentage'][idx]:.1f}%)"
+                for idx in filtered_fuel_mix_data.index  # Use the actual indices
+            ]
+        )
+
+        prompt_text = (
+            f"📅 Date: {date}\n"
+            f"🔋 Fuel Mix Data (MWh & Percentage):\n\n"
+            f"{fuel_mix_details}\n\n"
+            "Based on the above data, write a short report about the status of the energy system over the last 24 hours. "
+            "Please summarize the contribution of each fuel source to the overall mix and any notable trends. "
+            "Use the following structure for your response, incorporating the specified emojis to highlight each fuel source:\n\n"
+            "📋 Fuel Mix Status:\n"
+            "- 🪨 Coal: [percentage]%\n"
+            "- 🌬️ Gas: [percentage]%\n"
+            "- 🛢️ Other Fossil: [percentage]%\n"
+            "- 🌿 Renewables: [percentage]%\n\n"
+            f"- ⚡ Ireland is currently exporting electricity to the UK, with the average export being {export_value} MWh over the last 24 hours. \n"
+            "Note: Replace [percentage] with the actual percentages from the data. "
+            "Avoid using asterisks (*) in your response and stick to the names and format provided."
+        )
 
     return prompt_text
 
