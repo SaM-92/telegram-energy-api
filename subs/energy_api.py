@@ -198,12 +198,12 @@ def fuel_mix():
             ].values[0]
             < 0
         ):
-            net_import = "export"
+            net_import = "exporting"
         else:
             net_import = "importing"
         return fuel_mix_eirgrid, net_import
     except:
-        return None
+        return None, None
 
 
 def classify_status(value, min_val, max_val):
