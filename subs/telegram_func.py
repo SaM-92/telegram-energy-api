@@ -93,9 +93,7 @@ async def telegram_carbon_intensity(update, context, user_first_name):
         del audio_msg
 
 
-async def pie_chart_fuel_mix(
-    update, context, fuel_mix_eirgrid, net_import_status, current_time
-):
+async def pie_chart_fuel_mix(update, context, df, net_import_status, current_time):
 
     # Adjusting colors to be less vibrant (more pastel-like)
     pastel_colors = {
@@ -107,26 +105,23 @@ async def pie_chart_fuel_mix(
     }
     # print(fuel_mix_eirgrid)
     # Mapping the pastel colors to the dataframe's FieldName
-    pastel_pie_colors = [
-        pastel_colors[field] for field in fuel_mix_eirgrid["FieldName"]
-    ]
+    pastel_pie_colors = [pastel_colors[field] for field in df["FieldName"]]
+    # Filter df based on net_import_status
     if net_import_status == "importing":
-        custom_labels = [
-            f'{row["FieldName"]}\n({row["Percentage"]:.1f}%)'
-            for index, row in fuel_mix_eirgrid.iterrows()
-        ]
+        pie_data = df
     elif net_import_status == "exporting":
-        filtered_df_for_labels = fuel_mix_eirgrid[
-            fuel_mix_eirgrid["FieldName"] != "Net Import"
-        ]
-        custom_labels = [
-            f'{row["FieldName"]}\n({row["Percentage"]:.1f}%)'
-            for index, row in filtered_df_for_labels.iterrows()
-        ]
+        pie_data = df[df["FieldName"] != "Net Import"]
+        # Update pastel_pie_colors to match the filtered data
+        pastel_pie_colors = [pastel_colors[field] for field in pie_data["FieldName"]]
 
+    # Generate custom_labels from the (potentially filtered) pie_data
+    custom_labels = [
+        f'{row["FieldName"]}\n({row["Percentage"]:.1f}%)'
+        for index, row in pie_data.iterrows()
+    ]
     plt.figure(figsize=(7, 7))
     plt.pie(
-        fuel_mix_eirgrid["Value"],
+        pie_data["Percentage"],
         labels=custom_labels,
         startangle=140,
         colors=pastel_pie_colors,
