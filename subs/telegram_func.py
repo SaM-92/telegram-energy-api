@@ -4,6 +4,7 @@ from telegram.ext import (
 )
 from subs.energy_api import *
 from subs.openai_script import *
+from io import BytesIO
 
 
 async def send_co2_intensity_plot(
@@ -75,6 +76,8 @@ async def telegram_carbon_intensity(update, context, user_first_name):
             await send_co2_intensity_plot(update, context, df_with_trend)
         # slice the energy saving actions part
         energy_saving_actions = get_energy_actions(gpt_recom)
+        """ 
+        # I stopped  voice gen due to cost issues
         audio_msg = generate_voice(energy_saving_actions)
         await context.bot.send_voice(
             update.effective_chat.id,
@@ -82,6 +85,7 @@ async def telegram_carbon_intensity(update, context, user_first_name):
             caption="Here's your energy-saving tips 🎙️",
         )
         del audio_msg
+        """
 
 
 async def pie_chart_fuel_mix(update, context, df, net_import_status, current_time):
@@ -157,6 +161,9 @@ async def telegram_fuel_mix(update, context, user_first_name):
         await pie_chart_fuel_mix(
             update, context, fuel_mix_eirgrid, net_import_status, now
         )
+        """ 
+        # I stopped  voice gen due to cost issues
+
         audio_msg = generate_voice(fuel_mix_response_from_gpt)
 
         await context.bot.send_voice(
@@ -165,3 +172,4 @@ async def telegram_fuel_mix(update, context, user_first_name):
             caption="Here's fuel mix summary 🎙️",
         )
         del audio_msg
+        """
