@@ -46,7 +46,7 @@ async def telegram_carbon_intensity(update, context, user_first_name):
     df_carbon_forecast_indexed = None
     co2_stats_prior_day = None
     df_carbon_intensity_recent = None
-    user_first_name
+    # user_first_name
     # Proceed with your existing logic here...
     df_carbon_forecast_indexed = carbon_api_forecast()
     co2_stats_prior_day, df_carbon_intensity_recent = carbon_api_intensity()
@@ -143,21 +143,34 @@ async def pie_chart_fuel_mix(update, context, df, net_import_status, current_tim
 
 
 async def telegram_fuel_mix(update, context, user_first_name):
+    fuel_mix_eirgrid = None
+    net_import_status = None
+
     fuel_mix_eirgrid, net_import_status = fuel_mix()
-    now = round_time(datetime.datetime.now())
 
-    promopt_for_fuel_mix = create_fuel_mix_prompt(
-        now, fuel_mix_eirgrid, net_import_status
-    )
-    fuel_mix_response_from_gpt = opt_gpt_summarise(promopt_for_fuel_mix)
+    if fuel_mix_eirgrid is None or net_import_status is None:
+        await update.message.reply_html(
+            f"Sorry, {user_first_name} 😔. We're currently unable to retrieve the necessary data due to issues with the <a href='https://www.smartgriddashboard.com'>EirGrid website</a> 🌐. Please try again later. We appreciate your understanding 🙏."
+        )
+        return
+    else:
 
-    await update.message.reply_text(fuel_mix_response_from_gpt)
-    await pie_chart_fuel_mix(update, context, fuel_mix_eirgrid, net_import_status, now)
-    audio_msg = generate_voice(fuel_mix_response_from_gpt)
+        now = round_time(datetime.datetime.now())
 
-    await context.bot.send_voice(
-        update.effective_chat.id,
-        audio_msg,
-        caption="Here's fuel mix summary 🎙️",
-    )
-    del audio_msg
+        promopt_for_fuel_mix = create_fuel_mix_prompt(
+            now, fuel_mix_eirgrid, net_import_status
+        )
+        fuel_mix_response_from_gpt = opt_gpt_summarise(promopt_for_fuel_mix)
+
+        await update.message.reply_text(fuel_mix_response_from_gpt)
+        await pie_chart_fuel_mix(
+            update, context, fuel_mix_eirgrid, net_import_status, now
+        )
+        audio_msg = generate_voice(fuel_mix_response_from_gpt)
+
+        await context.bot.send_voice(
+            update.effective_chat.id,
+            audio_msg,
+            caption="Here's fuel mix summary 🎙️",
+        )
+        del audio_msg
