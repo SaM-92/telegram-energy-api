@@ -63,7 +63,8 @@ async def energy_api_func(update: Update, context: CallbackContext):
             f"Sorry {user_first_name}! 🤖 We are still working on this feature. Please try again later."
         )
 
-    options_keyboard = [["Start Over", "End Conversation", "Provide Feedback"]]
+    options_keyboard = [["🔄 Start Over", "🔚 End Conversation", "💬 Provide Feedback"]]
+
     reply_markup = ReplyKeyboardMarkup(options_keyboard, one_time_keyboard=True)
 
     await update.message.reply_text(
