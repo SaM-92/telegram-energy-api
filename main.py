@@ -37,6 +37,19 @@ SELECT_OPTION, FOLLOW_UP, FEEDBACK = range(3)
 
 
 async def energy_api_func(update: Update, context: CallbackContext):
+    """
+    Processes user requests for energy-related information via a Telegram bot and replies with relevant data or status updates.
+
+    This asynchronous function handles user queries for carbon intensity or fuel mix information. Upon receiving a request, it acknowledges receipt and processes the request based on the user's selected option. It supports dynamic user interactions by maintaining state and offering follow-up actions.
+
+    Args:
+        update (Update): Contains the incoming update data, including the user's message and chat information.
+        context (CallbackContext): Holds context-specific data like user data for state management between interactions.
+
+    Returns:
+        This function sends messages directly to the Telegram chat.
+        Returns a status code indicating the next step in the conversation flow, such as FOLLOW_UP for continuing interaction.
+    """
 
     user_first_name = update.message.from_user.first_name
 
