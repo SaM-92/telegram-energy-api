@@ -1,6 +1,5 @@
 import logging
 import os
-import pandas as pd
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (
     Application,
@@ -11,10 +10,9 @@ from telegram.ext import (
     ConversationHandler,
     CallbackContext,
 )
-from elevenlabs import generate
 from subs.energy_api import *
 from subs.openai_script import *
-from subs.telegram_func import send_co2_intensity_plot, telegram_carbon_intensity
+from subs.telegram_func import telegram_carbon_intensity
 from dotenv import load_dotenv
 
 # add vars to azure
@@ -40,7 +38,7 @@ async def energy_api_func(update: Update, context: CallbackContext):
     user_first_name = update.message.from_user.first_name
 
     await update.message.reply_text(
-        f"""Thank you! \n 🚀 We are now processing your request and we will get back to you shortly. \n ⏱️ It takes up to 10 seconds.. """
+        """Thank you! \n 🚀 We are now processing your request and we will get back to you shortly. \n ⏱️ It takes up to 10 seconds.. """
     )
 
     user_selected_option = update.message.text
