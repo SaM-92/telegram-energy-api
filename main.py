@@ -203,7 +203,7 @@ async def follow_up(update: Update, context: CallbackContext) -> int:
 
 async def feedback_command(update: Update, context: CallbackContext) -> int:
     logger.info("Entered feedback_command")
-    await update.message.reply_text("Please type your feedback.")
+    await update.message.reply_text("💬 Please type your feedback.")
     return FEEDBACK
 
 
@@ -248,11 +248,11 @@ def main() -> None:
                 MessageHandler(filters.TEXT & ~filters.COMMAND, energy_api_func)
             ],
             FOLLOW_UP: [
-                MessageHandler(filters.Regex("^(Start Over)$"), start_over_handler),
+                MessageHandler(filters.Regex("^🔄 Start Over$"), start_over_handler),
                 MessageHandler(
-                    filters.Regex("^(End Conversation)$"), end_conversation_handler
+                    filters.Regex("^🔚 End Conversation$"), end_conversation_handler
                 ),
-                MessageHandler(filters.Regex("^(Provide Feedback)$"), follow_up),
+                MessageHandler(filters.Regex("^💬 Provide Feedback$"), follow_up),
                 # Add a fallback handler within FOLLOW_UP for unexpected inputs
                 MessageHandler(filters.ALL, unexpected_input_handler),
             ],
