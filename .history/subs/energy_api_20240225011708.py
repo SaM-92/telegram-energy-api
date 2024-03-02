@@ -1,4 +1,5 @@
-import requests, json
+import requests
+import json
 import pandas as pd
 import datetime
 import matplotlib.pyplot as plt
@@ -6,7 +7,6 @@ import matplotlib.colors as mcolors
 import seaborn as sns
 import matplotlib.dates as mdates
 import numpy as np
-from io import BytesIO
 
 
 def eirgrid_api(area, region, start_time, end_time):
@@ -87,7 +87,7 @@ def carbon_api_forecast():
 
         return df_carbon_forecast_indexed
 
-    except Exception as e:
+    except Exception:
         # Return None or an error message to indicate failure
         return None
 
@@ -150,7 +150,7 @@ def carbon_api_intensity():
 
         return co2_stats_prior_day, df_carbon_intensity_recent
 
-    except Exception as e:
+    except Exception:
         # Return None or an error message to indicate failure
         return None, None
 

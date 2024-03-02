@@ -1,16 +1,3 @@
-import logging
-import os
-import pandas as pd
-from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import (
-    Application,
-    CommandHandler,
-    MessageHandler,
-    filters,
-    ContextTypes,
-    ConversationHandler,
-    CallbackContext,
-)
 from subs.energy_api import *
 from subs.openai_script import *
 
