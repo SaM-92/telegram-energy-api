@@ -10,6 +10,17 @@ from io import BytesIO
 async def send_co2_intensity_plot(
     update: Update, context: ContextTypes.DEFAULT_TYPE, df_
 ):
+    """
+    Asynchronously sends a CO2 intensity trend plot to a chat in Telegram.
+
+    This function generates a visualization of today's CO2 emission trends and intensity levels, highlighting expected changes throughout the day. It then sends this visualization to a specified chat, along with a caption explaining the plot.
+
+    Args:
+        update (Update): The update object representing the incoming update.
+        context (ContextTypes.DEFAULT_TYPE): The context object provided by the python-telegram-bot library, used for sending replies.
+        df_ (pd.DataFrame): A DataFrame containing the CO2 intensity data to be visualized.
+
+    """
 
     caption_text = (
         "🎨 This visualisation presents today's CO2 emission trends and intensity levels, "
@@ -35,6 +46,19 @@ async def send_co2_intensity_plot(
 
 
 async def telegram_carbon_intensity(update, context, user_first_name):
+    """
+    Asynchronously handles a Telegram bot command to provide CO2 intensity data analysis and recommendations.
+
+    This function fetches CO2 intensity forecast data, performs analysis to classify current intensity levels, generates textual recommendations using a GPT model, and sends this information back to the user via Telegram messages. If data retrieval fails, it notifies the user accordingly.
+
+    Args:
+        update (telegram.Update): The update object, which contains information about the incoming update, including the message and chat details.
+        context (telegram.ext.CallbackContext): The context object, providing access to additional data and methods to interact with the Telegram bot.
+        user_first_name (str): The first name of the user, used to personalize the response messages.
+
+    Returns:
+        None: This function does not return a value but sends responses directly to the Telegram chat.
+    """
     df_carbon_forecast_indexed = None
     co2_stats_prior_day = None
     df_carbon_intensity_recent = None
@@ -89,6 +113,19 @@ async def telegram_carbon_intensity(update, context, user_first_name):
 
 
 async def pie_chart_fuel_mix(update, context, df, net_import_status, current_time):
+    """
+    Generates and sends a pie chart visualizing the fuel mix for energy generation, adjusted by the net import status, to a Telegram chat.
+
+    Args:
+        update (telegram.Update): The update object, containing information about the incoming update.
+        context (telegram.ext.CallbackContext): The context object, providing access to Telegram's bot methods for responding.
+        df (pd.DataFrame): A DataFrame containing the fuel mix data with columns 'FieldName' and 'Percentage'.
+        net_import_status (str): A string indicating whether the region is 'importing' or 'exporting' energy, which affects the data representation.
+        current_time (str): A string representing the current time or the time frame of the data being visualized, included in the chart's title.
+
+    Returns:
+        None: The function sends a pie chart directly to the Telegram chat and does not return any value.
+    """
 
     # Adjusting colors to be less vibrant (more pastel-like)
     pastel_colors = {
@@ -138,6 +175,19 @@ async def pie_chart_fuel_mix(update, context, df, net_import_status, current_tim
 
 
 async def telegram_fuel_mix(update, context, user_first_name):
+    """
+    Asynchronously responds to a Telegram command by providing information about the current fuel mix and net import status, alongside a visual pie chart.
+
+    This function fetches the current fuel mix and net import status, generates a textual summary using GPT-based summarization, and sends this summary to the user. It also generates and sends a pie chart visualizing the fuel mix. If data retrieval fails, the user is informed via a message containing a link for further assistance.
+
+    Args:
+        update (telegram.Update): Object representing an incoming update.
+        context (telegram.ext.CallbackContext): Context object for sending replies.
+        user_first_name (str): The first name of the user, used to personalize the response.
+
+    Returns:
+        None: This function sends messages directly to the Telegram chat and does not return any value.
+    """
     fuel_mix_eirgrid = None
     net_import_status = None
 
