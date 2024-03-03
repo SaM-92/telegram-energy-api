@@ -220,6 +220,68 @@ def opt_gpt_summarise(prompt):
         return str(e)
 
 
+def personalised_advisor_prompt(carbon_data, user_response):
+    """_summary_
+
+    Args:
+        carbon_data (_type_): _description_
+        user_question (_type_): is the question asked by the user
+
+    Returns:
+        _type_: _description_
+    """
+
+    # carbon_data = "Low: 00:11-06:00, Medium: 06:01-18:00, High: 18:01-23:59"  # Example format for carbon intensity data
+    structure = (
+        "🌱 Carbon Intensity Periods Today: {carbon_data}\n"
+        "🔋 Device Recommendation: Based on your query, here's the best time to use your device:\n"
+        "Show Categories ONLY as below if there is any in the dataset"
+        "- 🟢 Low Carbon Period: Ideal time for high-energy consumption activities.\n"
+        "- 🟡 Medium Carbon Period: Use discretion; consider delaying if possible.\n"
+        "- 🔴 High Carbon Period: Avoid using energy-intensive devices if you can.\n"
+    )
+
+    msg_sys = (
+        "You are an AI energy specialist. Your role is to provide users with advice on optimizing their energy consumption "
+        "based on carbon intensity periods: low, medium, and high. Here is the carbon intensity summary for today: "
+        f"{carbon_data}. Your responses must be short, concise, and based solely on the provided data. "
+        "Follow this structure for your advice: "
+        + structure
+        + "\nRemember, your goal is to help users make more sustainable energy decisions."
+    )
+
+    # Note: The `structure` variable is meant to show how the response should be formatted. In practice,
+    # you would replace placeholders like `{carbon_data}` dynamically based on actual data and the specific user query.
+
+    # Example user question for clarity
+    msg_user = user_response  # "laundary?"
+
+    # Example setup for calling the API with the structured system message and a user query
+    messages = [
+        {"role": "system", "content": msg_sys},
+        {"role": "user", "content": msg_user},
+    ]
+
+    try:
+        # Making the API call
+        response = openai.chat.completions.create(
+            model="gpt-3.5-turbo",  # or "gpt-3.5-turbo" based on your subscription
+            messages=messages,
+            temperature=1,
+            max_tokens=600,  # Adjust the number of tokens as needed
+            n=1,  # Number of completions to generate
+            stop=None,  # Specify any stopping criteria if needed
+        )
+
+        # Extracting the response
+        # generated_text = response.choices[0].message['content'].strip()
+        generated_text = response.choices[0].message.content.strip()
+
+        return generated_text
+    except Exception as e:
+        return str(e)
+
+
 def get_energy_actions(text):
     """
     Extracts a specific section from a larger text, focusing on energy-saving actions.

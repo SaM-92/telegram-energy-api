@@ -136,6 +136,26 @@ async def telegram_carbon_intensity(update, context, user_first_name):
         """
 
 
+async def telegram_personalised_handler(update, context, user_first_name):
+    today_date, eu_summary_text, quantile_summary_text, df_with_trend = (
+        carbon_forecast_intensity_prompts()
+    )
+    if (
+        eu_summary_text is None
+        or quantile_summary_text is None
+        or df_with_trend is None
+    ):
+        await update.message.reply_html(
+            f"Sorry, {user_first_name} 😔. We're currently unable to retrieve the necessary data due to issues with the <a href='https://www.smartgriddashboard.com'>EirGrid website</a> 🌐. Please try again later. We appreciate your understanding 🙏."
+        )
+        return  # Exit the function early since we can't proceed without the data
+    else:
+
+        prompt = create_combined_gpt_prompt(
+            today_date, eu_summary_text, quantile_summary_text
+        )
+
+
 async def pie_chart_fuel_mix(update, context, df, net_import_status, current_time):
     """
     Generates and sends a pie chart visualizing the fuel mix for energy generation, adjusted by the net import status, to a Telegram chat.
