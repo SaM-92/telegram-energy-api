@@ -21,6 +21,7 @@ The CleanEnergyBot is a Telegram bot designed to empower users in Ireland with r
 - **Energy Saving Recommendations**: Delivers tailored advice on the most efficient times for energy usage, helping users reduce their carbon footprint.
 - **Fuel Mix Insights**: Delivers detailed information on the current mix of fuel sources powering the electricity grid, including renewables, gas, coal, and other sources. This feature helps users understand the environmental impact of their electricity consumption and the role of renewable energy in the grid.
 - **Text-to-Speech for Energy Saving Tips**: Utilising the ElevenLabs API, the bot now sends energy-saving tips as voice messages, making it easier and more convenient for users to receive and listen to advice on the go.
+- **Interactive User Conversations**: Users can now have detailed conversations with the bot, asking for energy advice and receiving personalized recommendations. A query limit of 3 per 3 hours is in place to manage API costs effectively.
 - **User Interaction**: Supports various commands for users to start conversations, receive energy status updates, give feedback, and more.
 - **Graphical Analysis**: Sends users colour-coded graphical images indicating periods of low, medium, and high carbon intensity, as well as pie charts visualizing the current fuel mix.
 
@@ -32,7 +33,7 @@ The CleanEnergyBot was developed through a series of carefully structured steps,
 2. **Data Analysis**: The fetched data are analyzed to determine CO2 emissions intensity and compliance with EU standards, categorizing them into low, medium, and high segments.
 3. **OpenAI API Integration**: Functions were developed to prepare structured prompts for the OpenAI API, facilitating the generation of reports and energy-saving tips for users.
 4. **Text-to-Speech Integration**: The ElevenLabs API has been integrated to convert energy-saving tips into audio format, enhancing accessibility and user engagement.
-5. **Interactive Bot Interface**: The bot offers various interaction options, including restarting the conversation, contacting the developer, and providing feedback.
+5. **Interactive Bot Interface and Query Limitation**: The bot offers various interaction options, including restarting the conversation, contacting the developer, providing feedback, and engaging in detailed conversations with a built-in query limit for cost-effective API usage.
 
 ## Deployment on Azure
 
