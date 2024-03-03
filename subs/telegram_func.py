@@ -137,21 +137,43 @@ async def telegram_carbon_intensity(update, context, user_first_name):
 
 
 async def telegram_personalised_handler(update, context, user_first_name, user_query):
+    """
+    Processes personalized user queries about energy usage, utilizing CO2 intensity data for customized advice.
 
-    today_date, eu_summary_text, quantile_summary_text, df_with_trend = (
-        carbon_forecast_intensity_prompts()
-    )
-    if (
-        eu_summary_text is None
-        or quantile_summary_text is None
-        or df_with_trend is None
-    ):
-        await update.message.reply_html(
-            f"Sorry, {user_first_name} 😔. We're currently unable to retrieve the necessary data due to issues with the <a href='https://www.smartgriddashboard.com'>EirGrid website</a> 🌐. Please try again later. We appreciate your understanding 🙏."
+    This function assesses user queries for energy advice by first checking if CO2 intensity data summaries are already stored in the session. If not, it fetches and stores this data. It then generates and returns a GPT-based personalized response considering CO2 emission trends.
+
+    Args:
+        update (telegram.Update): Telegram update triggering the handler.
+        context (telegram.ext.CallbackContext): Provides access to bot's methods and user data for session management.
+        user_first_name (str): User's first name for personalized interaction.
+        user_query (str): The user's query regarding energy usage.
+
+    Returns:
+        str: A GPT-generated personalized advice response based on the user's query and current CO2 emission data, or an error message if necessary data is unavailable.
+    """
+    if "quantile_summary_text" not in context.user_data:
+
+        today_date, eu_summary_text, quantile_summary_text, df_with_trend = (
+            carbon_forecast_intensity_prompts()
         )
-        return  # Exit the function early since we can't proceed without the data
+        if (
+            eu_summary_text is None
+            or quantile_summary_text is None
+            or df_with_trend is None
+        ):
+            await update.message.reply_html(
+                f"Sorry, {user_first_name} 😔. We're currently unable to retrieve the necessary data due to issues with the <a href='https://www.smartgriddashboard.com'>EirGrid website</a> 🌐. Please try again later. We appreciate your understanding 🙏."
+            )
+            return
+        else:
+            # Store the quantile_summary_text for reuse
+            context.user_data["quantile_summary_text"] = quantile_summary_text
+            response_of_gpt = submit_energy_query_and_handle_response(
+                quantile_summary_text, user_query
+            )
+            return response_of_gpt
     else:
-
+        quantile_summary_text = context.user_data["quantile_summary_text"]
         response_of_gpt = submit_energy_query_and_handle_response(
             quantile_summary_text, user_query
         )

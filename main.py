@@ -254,9 +254,11 @@ async def personalised_recommendations_handler(
 async def planning_response_handler(update: Update, context: CallbackContext) -> int:
     # User's response to the planning question
     user_query = update.message.text
+
     # Check if there's an existing conversation context
     if "conversation_context" not in context.user_data:
         context.user_data["conversation_context"] = user_query
+
     else:
         # Append new question to existing context
         context.user_data["conversation_context"] += f"\n{user_query}"
@@ -267,7 +269,13 @@ async def planning_response_handler(update: Update, context: CallbackContext) ->
     AI_response_to_query = await telegram_personalised_handler(
         update, context, user_first_name, context.user_data["conversation_context"]
     )
-    await update.message.reply_text(AI_response_to_query)
+    if AI_response_to_query:
+        await update.message.reply_text(AI_response_to_query)
+    else:
+        # Provide a default message or handle the case as needed
+        await update.message.reply_text(
+            "I'm sorry, but I couldn't process your request. Please try again."
+        )
 
     # Ask if they have any further questions
     await update.message.reply_text("Any further questions (Y/N)?")
@@ -281,10 +289,12 @@ async def follow_up_handler(update: Update, context: CallbackContext) -> int:
 
     if user_response in ["yes", "y"]:
         # Prompt for the next question
-        await update.message.reply_text("What would you like to know next?")
+        await update.message.reply_text("🤔 What would you like to know next?")
         return ASK_PLAN
     else:
-        await update.message.reply_text("Thank you for using our service. Goodbye!")
+        await update.message.reply_text(
+            "Thank you for using our service. Have a great day! 💚 🌎"
+        )
         return ConversationHandler.END
 
 
