@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 # SELECT_OPTION = 0
 TIME_COLUMN_SELECTED = 1
 # FOLLOW_UP = 0
-SELECT_OPTION, FOLLOW_UP, FEEDBACK, ASK_PLAN = range(4)
+SELECT_OPTION, FOLLOW_UP, FEEDBACK, ASK_PLAN, FOLLOW_UP_CONVERSATION = range(5)
 
 
 async def energy_api_func(update: Update, context: CallbackContext):
@@ -254,15 +254,38 @@ async def personalised_recommendations_handler(
 async def planning_response_handler(update: Update, context: CallbackContext) -> int:
     # User's response to the planning question
     user_query = update.message.text
+    # Check if there's an existing conversation context
+    if "conversation_context" not in context.user_data:
+        context.user_data["conversation_context"] = user_query
+    else:
+        # Append new question to existing context
+        context.user_data["conversation_context"] += f"\n{user_query}"
+
     user_first_name = update.message.from_user.first_name
     # Logic to process the user's response and provide recommendations
     # Your recommendation logic here
     AI_response_to_query = await telegram_personalised_handler(
-        update, context, user_first_name, user_query
+        update, context, user_first_name, context.user_data["conversation_context"]
     )
     await update.message.reply_text(AI_response_to_query)
+
+    # Ask if they have any further questions
+    await update.message.reply_text("Any further questions (Y/N)?")
+
     # Transition to another state or end the conversation
-    return ConversationHandler.END
+    return FOLLOW_UP_CONVERSATION
+
+
+async def follow_up_handler(update: Update, context: CallbackContext) -> int:
+    user_response = update.message.text.lower()
+
+    if user_response in ["yes", "y"]:
+        # Prompt for the next question
+        await update.message.reply_text("What would you like to know next?")
+        return ASK_PLAN
+    else:
+        await update.message.reply_text("Thank you for using our service. Goodbye!")
+        return ConversationHandler.END
 
 
 def main() -> None:
@@ -285,7 +308,7 @@ def main() -> None:
             CommandHandler("start", start),
             CommandHandler("energy_status", energy_status),
             CommandHandler(
-                "test",
+                "personal_advice",
                 personalised_recommendations_handler,
             ),
             CommandHandler("feedback", feedback_command),
@@ -313,6 +336,9 @@ def main() -> None:
                     filters.TEXT & ~filters.COMMAND, planning_response_handler
                 )
             ],
+            FOLLOW_UP_CONVERSATION: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, follow_up_handler)
+            ],
             FEEDBACK: [MessageHandler(filters.TEXT & ~filters.COMMAND, feedback_text)],
         },
         fallbacks=[
@@ -335,7 +361,7 @@ def main() -> None:
         CommandHandler("cancel", cancel)
     )  # Directly handle cancel command
     application.add_handler(
-        CommandHandler("test", personalised_recommendations_handler)
+        CommandHandler("personal_advice", personalised_recommendations_handler)
     )
 
     application.run_polling()

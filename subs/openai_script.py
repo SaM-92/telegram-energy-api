@@ -235,20 +235,23 @@ def submit_energy_query_and_handle_response(carbon_data, user_query):
     # carbon_data = "Low: 00:11-06:00, Medium: 06:01-18:00, High: 18:01-23:59"  # Example format for carbon intensity data
     structure = (
         "🌱 Carbon Intensity Periods Today: {carbon_data}\n"
-        "🔋 Device Recommendation: Based on your query, here's the best time to use your device:\n"
-        "Start with a summary of today's carbon intensity periods, using emojis to indicate low (🟢), medium (🟡), and high (🔴) emissions. If certain emission periods are not present in the dataset, omit them from the summary."
-        "- 🟢 Low Carbon Period: Ideal time for high-energy consumption activities.\n"
-        "- 🟡 Medium Carbon Period: Use discretion; consider delaying if possible.\n"
-        "- 🔴 High Carbon Period: Avoid using energy-intensive devices if you can.\n"
+        "🔋 Device Recommendation: Given the energy consumption characteristics of the devices mentioned (e.g., laundry machines, EV chargers, kettles), here is our advice:\n"
+        "- 🟢 Low Carbon Period: This is the ideal time for using high-energy consumption devices. We strongly recommend scheduling usage during these periods to minimize your carbon footprint.\n"
+        "- 🟡 Medium Carbon Period: If it is not feasible to use your devices during the low carbon period, medium periods are an acceptable alternative. However, preference should always be given to low carbon periods when possible.\n"
+        "- 🔴 High Carbon Period: We recommend avoiding the use of energy-intensive devices during high carbon periods to prevent contributing to peak demand and higher carbon emissions.\n"
+        "Our goal is to guide you towards making energy consumption choices that are both efficient and environmentally friendly."
     )
 
     msg_sys = (
         "You are an AI energy specialist. Your role is to provide users with advice on optimizing their energy consumption "
         "based on carbon intensity periods: low, medium, and high. Here is the carbon intensity summary for today: "
-        f"{carbon_data}. Your responses must be short, concise, and based solely on the provided data. "
-        "Follow this structure for your advice: "
+        f"{carbon_data}. "
+        "Our recommendations are designed to align with sustainable energy usage practices:\n"
+        "1. High-energy consumption devices are best used during low carbon periods.\n"
+        "2. Medium carbon periods can be considered for less critical usage if low periods are not practical, but with a preference for low periods.\n"
+        "3. High carbon periods should be avoided for energy-intensive devices to reduce environmental impact.\n"
+        "Follow this guidance to make informed decisions about when to use your devices, aiming for the most sustainable outcomes."
         + structure
-        + "\nRemember, your goal is to help users make more sustainable energy decisions."
     )
 
     # Note: The `structure` variable is meant to show how the response should be formatted. In practice,
