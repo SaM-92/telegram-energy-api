@@ -257,7 +257,7 @@ async def planning_response_handler(update: Update, context: CallbackContext) ->
     user_first_name = update.message.from_user.first_name
     # Logic to process the user's response and provide recommendations
     # Your recommendation logic here
-    AI_response_to_query = telegram_personalised_handler(
+    AI_response_to_query = await telegram_personalised_handler(
         update, context, user_first_name, user_query
     )
     await update.message.reply_text(AI_response_to_query)

@@ -152,9 +152,11 @@ async def telegram_personalised_handler(update, context, user_first_name, user_q
         return  # Exit the function early since we can't proceed without the data
     else:
 
-        prompt = submit_energy_query_and_handle_response(
+        response_of_gpt = submit_energy_query_and_handle_response(
             quantile_summary_text, user_query
         )
+
+        return response_of_gpt
 
 
 async def pie_chart_fuel_mix(update, context, df, net_import_status, current_time):
