@@ -220,15 +220,16 @@ def opt_gpt_summarise(prompt):
         return str(e)
 
 
-def personalised_advisor_prompt(carbon_data, user_response):
-    """_summary_
+def submit_energy_query_and_handle_response(carbon_data, user_query):
+    """
+    Generates a personalized advice prompt for an AI energy specialist based on carbon intensity data and user's question.
 
     Args:
-        carbon_data (_type_): _description_
-        user_question (_type_): is the question asked by the user
+        carbon_data (str): A string summarizing the carbon intensity data for the current day, formatted as "Low: HH:MM-HH:MM, Medium: HH:MM-HH:MM, High: HH:MM-HH:MM".
+        user_query (str): The question asked by the user, seeking advice on energy consumption for a specific device or activity.
 
     Returns:
-        _type_: _description_
+        str: The AI model's generated response, offering personalized advice on energy consumption based on the provided carbon intensity data and the user's question.
     """
 
     # carbon_data = "Low: 00:11-06:00, Medium: 06:01-18:00, High: 18:01-23:59"  # Example format for carbon intensity data
@@ -254,7 +255,7 @@ def personalised_advisor_prompt(carbon_data, user_response):
     # you would replace placeholders like `{carbon_data}` dynamically based on actual data and the specific user query.
 
     # Example user question for clarity
-    msg_user = user_response  # "laundary?"
+    msg_user = user_query  # "laundary?"
 
     # Example setup for calling the API with the structured system message and a user query
     messages = [

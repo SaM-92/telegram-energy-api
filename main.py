@@ -15,6 +15,7 @@ from subs.openai_script import *
 from subs.telegram_func import (
     telegram_carbon_intensity,
     telegram_fuel_mix,
+    telegram_personalised_handler,
 )
 from dotenv import load_dotenv
 
@@ -252,13 +253,14 @@ async def personalised_recommendations_handler(
 
 async def planning_response_handler(update: Update, context: CallbackContext) -> int:
     # User's response to the planning question
-    user_response = update.message.text
+    user_query = update.message.text
+    user_first_name = update.message.from_user.first_name
     # Logic to process the user's response and provide recommendations
     # Your recommendation logic here
-
-    await update.message.reply_text(
-        "Based on your plans/devices, here are some sustainable options: ..."
+    AI_response_to_query = telegram_personalised_handler(
+        update, context, user_first_name, user_query
     )
+    await update.message.reply_text(AI_response_to_query)
     # Transition to another state or end the conversation
     return ConversationHandler.END
 

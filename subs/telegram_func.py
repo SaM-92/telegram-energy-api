@@ -136,7 +136,8 @@ async def telegram_carbon_intensity(update, context, user_first_name):
         """
 
 
-async def telegram_personalised_handler(update, context, user_first_name):
+async def telegram_personalised_handler(update, context, user_first_name, user_query):
+
     today_date, eu_summary_text, quantile_summary_text, df_with_trend = (
         carbon_forecast_intensity_prompts()
     )
@@ -151,8 +152,8 @@ async def telegram_personalised_handler(update, context, user_first_name):
         return  # Exit the function early since we can't proceed without the data
     else:
 
-        prompt = create_combined_gpt_prompt(
-            today_date, eu_summary_text, quantile_summary_text
+        prompt = submit_energy_query_and_handle_response(
+            quantile_summary_text, user_query
         )
 
 
