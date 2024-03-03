@@ -45,19 +45,14 @@ async def send_co2_intensity_plot(
     await context.bot.send_photo(chat_id=chat_id, photo=buf, caption=caption_text)
 
 
-async def telegram_carbon_intensity(update, context, user_first_name):
+def carbon_forecast_intensity_prompts():
     """
-    Asynchronously handles a Telegram bot command to provide CO2 intensity data analysis and recommendations.
+    Generates prompts and data for CO2 intensity forecasts, including analysis and visualization preparation.
 
-    This function fetches CO2 intensity forecast data, performs analysis to classify current intensity levels, generates textual recommendations using a GPT model, and sends this information back to the user via Telegram messages. If data retrieval fails, it notifies the user accordingly.
-
-    Args:
-        update (telegram.Update): The update object, which contains information about the incoming update, including the message and chat details.
-        context (telegram.ext.CallbackContext): The context object, providing access to additional data and methods to interact with the Telegram bot.
-        user_first_name (str): The first name of the user, used to personalize the response messages.
+    Fetches CO2 forecast data, performs intensity analysis, categorizes emission periods, and prepares data for generating GPT prompts and visualizations. If any data retrieval or processing step fails, it returns None for all output values.
 
     Returns:
-        None: This function does not return a value but sends responses directly to the Telegram chat.
+        tuple: Contains the today's date, EU standards summary text, quantile-based summary text, and a DataFrame prepared for trend analysis and visualization, or None values if data retrieval fails.
     """
     df_carbon_forecast_indexed = None
     co2_stats_prior_day = None
@@ -72,11 +67,9 @@ async def telegram_carbon_intensity(update, context, user_first_name):
         or co2_stats_prior_day is None
         or df_carbon_intensity_recent is None
     ):
-        await update.message.reply_html(
-            f"Sorry, {user_first_name} 😔. We're currently unable to retrieve the necessary data due to issues with the <a href='https://www.smartgriddashboard.com'>EirGrid website</a> 🌐. Please try again later. We appreciate your understanding 🙏."
-        )
+        return None, None, None, None
 
-        return  # Exit the function early since we can't proceed without the data
+    # Exit the function early since we can't proceed without the data
     else:
         # df_carbon_forecast_indexed = carbon_api_forecast()
         # co2_stats_prior_day, df_carbon_intensity_recent = carbon_api_intensity()
@@ -88,6 +81,37 @@ async def telegram_carbon_intensity(update, context, user_first_name):
         quantile_summary_text, df_with_trend_ = find_optimized_relative_periods(
             df_with_trend
         )  # Generate this based on your DataFrame
+        return today_date, eu_summary_text, quantile_summary_text, df_with_trend
+
+
+async def telegram_carbon_intensity(update, context, user_first_name):
+    """
+    Sends CO2 intensity data and energy-saving tips to the user via a Telegram bot.
+
+    This async function retrieves CO2 intensity forecasts and generates recommendations based on these forecasts. It notifies the user if data cannot be fetched and provides energy-saving tips and visual data representations when available.
+
+    Args:
+        update (telegram.Update): Contains incoming update details.
+        context (telegram.ext.CallbackContext): Holds methods for bot interactions.
+        user_first_name (str): User's first name for personalized messaging.
+
+    Returns:
+        None: Directly sends messages and data visualizations to the user.
+    """
+
+    today_date, eu_summary_text, quantile_summary_text, df_with_trend = (
+        carbon_forecast_intensity_prompts()
+    )
+    if (
+        eu_summary_text is None
+        or quantile_summary_text is None
+        or df_with_trend is None
+    ):
+        await update.message.reply_html(
+            f"Sorry, {user_first_name} 😔. We're currently unable to retrieve the necessary data due to issues with the <a href='https://www.smartgriddashboard.com'>EirGrid website</a> 🌐. Please try again later. We appreciate your understanding 🙏."
+        )
+        return  # Exit the function early since we can't proceed without the data
+    else:
 
         prompt = create_combined_gpt_prompt(
             today_date, eu_summary_text, quantile_summary_text

@@ -245,9 +245,22 @@ async def personalised_recommendations_handler(
 ) -> None:
     # Prompt the user to specify their plans or devices they intend to use
     await update.message.reply_text(
-        "What do you want to do today, or what kind of devices do you plan to use? Let me know, and I'll help you decide more sustainably."
+        "🔌💡 Wondering about the best time for laundry to save energy? Just mention the device or ask me—like when to do laundry? I'm here to guide you! 🌿👕"
     )
     return ASK_PLAN
+
+
+async def planning_response_handler(update: Update, context: CallbackContext) -> int:
+    # User's response to the planning question
+    user_response = update.message.text
+    # Logic to process the user's response and provide recommendations
+    # Your recommendation logic here
+
+    await update.message.reply_text(
+        "Based on your plans/devices, here are some sustainable options: ..."
+    )
+    # Transition to another state or end the conversation
+    return ConversationHandler.END
 
 
 def main() -> None:
@@ -288,6 +301,11 @@ def main() -> None:
                 MessageHandler(filters.Regex("^💬 Provide Feedback$"), follow_up),
                 # Add a fallback handler within FOLLOW_UP for unexpected inputs
                 MessageHandler(filters.ALL, unexpected_input_handler),
+            ],
+            ASK_PLAN: [
+                MessageHandler(
+                    filters.TEXT & ~filters.COMMAND, planning_response_handler
+                )
             ],
             FEEDBACK: [MessageHandler(filters.TEXT & ~filters.COMMAND, feedback_text)],
         },
