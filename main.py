@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 # SELECT_OPTION = 0
 TIME_COLUMN_SELECTED = 1
 # FOLLOW_UP = 0
-SELECT_OPTION, FOLLOW_UP, FEEDBACK = range(3)
+SELECT_OPTION, FOLLOW_UP, FEEDBACK, ASK_PLAN = range(4)
 
 
 async def energy_api_func(update: Update, context: CallbackContext):
@@ -76,8 +76,14 @@ async def energy_api_func(update: Update, context: CallbackContext):
             f"Sorry {user_first_name}! 🤖 We are still working on this feature. Please try again later."
         )
 
-    options_keyboard = [["🔄 Start Over", "🔚 End Conversation", "💬 Provide Feedback"]]
-
+    options_keyboard = [
+        [
+            "✨ Personalised Recommendations",
+            "🔄 Start Over",
+            "🔚 End Conversation",
+            "💬 Provide Feedback",
+        ]
+    ]
     reply_markup = ReplyKeyboardMarkup(options_keyboard, one_time_keyboard=True)
 
     await update.message.reply_text(
@@ -234,6 +240,16 @@ async def feedback_text(update: Update, context: CallbackContext) -> int:
     return ConversationHandler.END
 
 
+async def personalised_recommendations_handler(
+    update: Update, context: CallbackContext
+) -> None:
+    # Prompt the user to specify their plans or devices they intend to use
+    await update.message.reply_text(
+        "What do you want to do today, or what kind of devices do you plan to use? Let me know, and I'll help you decide more sustainably."
+    )
+    return ASK_PLAN
+
+
 def main() -> None:
     """
     Entry point of the program.
@@ -261,6 +277,10 @@ def main() -> None:
                 MessageHandler(filters.TEXT & ~filters.COMMAND, energy_api_func)
             ],
             FOLLOW_UP: [
+                MessageHandler(
+                    filters.Regex("^✨ Personalised Recommendations$"),
+                    personalised_recommendations_handler,
+                ),
                 MessageHandler(filters.Regex("^🔄 Start Over$"), start_over_handler),
                 MessageHandler(
                     filters.Regex("^🔚 End Conversation$"), end_conversation_handler
