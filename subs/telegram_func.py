@@ -10,6 +10,17 @@ from io import BytesIO
 async def send_co2_intensity_plot(
     update: Update, context: ContextTypes.DEFAULT_TYPE, df_
 ):
+    """
+    Asynchronously sends a CO2 intensity trend plot to a chat in Telegram.
+
+    This function generates a visualization of today's CO2 emission trends and intensity levels, highlighting expected changes throughout the day. It then sends this visualization to a specified chat, along with a caption explaining the plot.
+
+    Args:
+        update (Update): The update object representing the incoming update.
+        context (ContextTypes.DEFAULT_TYPE): The context object provided by the python-telegram-bot library, used for sending replies.
+        df_ (pd.DataFrame): A DataFrame containing the CO2 intensity data to be visualized.
+
+    """
 
     caption_text = (
         "🎨 This visualisation presents today's CO2 emission trends and intensity levels, "
@@ -34,7 +45,15 @@ async def send_co2_intensity_plot(
     await context.bot.send_photo(chat_id=chat_id, photo=buf, caption=caption_text)
 
 
-async def telegram_carbon_intensity(update, context, user_first_name):
+def carbon_forecast_intensity_prompts():
+    """
+    Generates prompts and data for CO2 intensity forecasts, including analysis and visualization preparation.
+
+    Fetches CO2 forecast data, performs intensity analysis, categorizes emission periods, and prepares data for generating GPT prompts and visualizations. If any data retrieval or processing step fails, it returns None for all output values.
+
+    Returns:
+        tuple: Contains the today's date, EU standards summary text, quantile-based summary text, and a DataFrame prepared for trend analysis and visualization, or None values if data retrieval fails.
+    """
     df_carbon_forecast_indexed = None
     co2_stats_prior_day = None
     df_carbon_intensity_recent = None
@@ -48,11 +67,9 @@ async def telegram_carbon_intensity(update, context, user_first_name):
         or co2_stats_prior_day is None
         or df_carbon_intensity_recent is None
     ):
-        await update.message.reply_html(
-            f"Sorry, {user_first_name} 😔. We're currently unable to retrieve the necessary data due to issues with the <a href='https://www.smartgriddashboard.com'>EirGrid website</a> 🌐. Please try again later. We appreciate your understanding 🙏."
-        )
+        return None, None, None, None
 
-        return  # Exit the function early since we can't proceed without the data
+    # Exit the function early since we can't proceed without the data
     else:
         # df_carbon_forecast_indexed = carbon_api_forecast()
         # co2_stats_prior_day, df_carbon_intensity_recent = carbon_api_intensity()
@@ -64,6 +81,37 @@ async def telegram_carbon_intensity(update, context, user_first_name):
         quantile_summary_text, df_with_trend_ = find_optimized_relative_periods(
             df_with_trend
         )  # Generate this based on your DataFrame
+        return today_date, eu_summary_text, quantile_summary_text, df_with_trend
+
+
+async def telegram_carbon_intensity(update, context, user_first_name):
+    """
+    Sends CO2 intensity data and energy-saving tips to the user via a Telegram bot.
+
+    This async function retrieves CO2 intensity forecasts and generates recommendations based on these forecasts. It notifies the user if data cannot be fetched and provides energy-saving tips and visual data representations when available.
+
+    Args:
+        update (telegram.Update): Contains incoming update details.
+        context (telegram.ext.CallbackContext): Holds methods for bot interactions.
+        user_first_name (str): User's first name for personalized messaging.
+
+    Returns:
+        None: Directly sends messages and data visualizations to the user.
+    """
+
+    today_date, eu_summary_text, quantile_summary_text, df_with_trend = (
+        carbon_forecast_intensity_prompts()
+    )
+    if (
+        eu_summary_text is None
+        or quantile_summary_text is None
+        or df_with_trend is None
+    ):
+        await update.message.reply_html(
+            f"Sorry, {user_first_name} 😔. We're currently unable to retrieve the necessary data due to issues with the <a href='https://www.smartgriddashboard.com'>EirGrid website</a> 🌐. Please try again later. We appreciate your understanding 🙏."
+        )
+        return  # Exit the function early since we can't proceed without the data
+    else:
 
         prompt = create_combined_gpt_prompt(
             today_date, eu_summary_text, quantile_summary_text
@@ -88,7 +136,65 @@ async def telegram_carbon_intensity(update, context, user_first_name):
         """
 
 
+async def telegram_personalised_handler(update, context, user_first_name, user_query):
+    """
+    Processes personalized user queries about energy usage, utilizing CO2 intensity data for customized advice.
+
+    This function assesses user queries for energy advice by first checking if CO2 intensity data summaries are already stored in the session. If not, it fetches and stores this data. It then generates and returns a GPT-based personalized response considering CO2 emission trends.
+
+    Args:
+        update (telegram.Update): Telegram update triggering the handler.
+        context (telegram.ext.CallbackContext): Provides access to bot's methods and user data for session management.
+        user_first_name (str): User's first name for personalized interaction.
+        user_query (str): The user's query regarding energy usage.
+
+    Returns:
+        str: A GPT-generated personalized advice response based on the user's query and current CO2 emission data, or an error message if necessary data is unavailable.
+    """
+    if "quantile_summary_text" not in context.user_data:
+
+        today_date, eu_summary_text, quantile_summary_text, df_with_trend = (
+            carbon_forecast_intensity_prompts()
+        )
+        if (
+            eu_summary_text is None
+            or quantile_summary_text is None
+            or df_with_trend is None
+        ):
+            await update.message.reply_html(
+                f"Sorry, {user_first_name} 😔. We're currently unable to retrieve the necessary data due to issues with the <a href='https://www.smartgriddashboard.com'>EirGrid website</a> 🌐. Please try again later. We appreciate your understanding 🙏."
+            )
+            return
+        else:
+            # Store the quantile_summary_text for reuse
+            context.user_data["quantile_summary_text"] = quantile_summary_text
+            response_of_gpt = submit_energy_query_and_handle_response(
+                quantile_summary_text, user_query
+            )
+            return response_of_gpt
+    else:
+        quantile_summary_text = context.user_data["quantile_summary_text"]
+        response_of_gpt = submit_energy_query_and_handle_response(
+            quantile_summary_text, user_query
+        )
+
+        return response_of_gpt
+
+
 async def pie_chart_fuel_mix(update, context, df, net_import_status, current_time):
+    """
+    Generates and sends a pie chart visualizing the fuel mix for energy generation, adjusted by the net import status, to a Telegram chat.
+
+    Args:
+        update (telegram.Update): The update object, containing information about the incoming update.
+        context (telegram.ext.CallbackContext): The context object, providing access to Telegram's bot methods for responding.
+        df (pd.DataFrame): A DataFrame containing the fuel mix data with columns 'FieldName' and 'Percentage'.
+        net_import_status (str): A string indicating whether the region is 'importing' or 'exporting' energy, which affects the data representation.
+        current_time (str): A string representing the current time or the time frame of the data being visualized, included in the chart's title.
+
+    Returns:
+        None: The function sends a pie chart directly to the Telegram chat and does not return any value.
+    """
 
     # Adjusting colors to be less vibrant (more pastel-like)
     pastel_colors = {
@@ -138,6 +244,19 @@ async def pie_chart_fuel_mix(update, context, df, net_import_status, current_tim
 
 
 async def telegram_fuel_mix(update, context, user_first_name):
+    """
+    Asynchronously responds to a Telegram command by providing information about the current fuel mix and net import status, alongside a visual pie chart.
+
+    This function fetches the current fuel mix and net import status, generates a textual summary using GPT-based summarization, and sends this summary to the user. It also generates and sends a pie chart visualizing the fuel mix. If data retrieval fails, the user is informed via a message containing a link for further assistance.
+
+    Args:
+        update (telegram.Update): Object representing an incoming update.
+        context (telegram.ext.CallbackContext): Context object for sending replies.
+        user_first_name (str): The first name of the user, used to personalize the response.
+
+    Returns:
+        None: This function sends messages directly to the Telegram chat and does not return any value.
+    """
     fuel_mix_eirgrid = None
     net_import_status = None
 

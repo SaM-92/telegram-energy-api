@@ -10,6 +10,20 @@ import numpy as np
 
 
 def eirgrid_api(area, region, start_time, end_time):
+    """Fetches data from the EirGrid API for a specified area and region within a given time range.
+
+    Args:
+        area (str): The data area of interest. Valid values include "CO2Stats", "generationactual",
+                    "co2emission", "co2intensity", "interconnection", "SnspAll", "frequency",
+                    "demandactual", "windactual", "fuelMix".
+        region (str): The region for which the data is requested. Options are "ROI" (Republic of Ireland),
+                      "NI" (Northern Ireland), or "ALL" for both.
+        start_time (str): The start time for the data request in 'YYYY-MM-DD' format.
+        end_time (str): The end time for the data request in 'YYYY-MM-DD' format.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the requested data.
+    """
     #     area = [
     #     "CO2Stats",
     #     "generationactual",
@@ -35,6 +49,14 @@ def eirgrid_api(area, region, start_time, end_time):
 
 # Function to round time to the nearest 15 minutes
 def round_time(dt):
+    """Rounds a datetime object's minutes to the nearest quarter hour.
+
+    Args:
+        dt (datetime): The datetime object to round.
+
+    Returns:
+        datetime: A new datetime object rounded to the nearest 15 minutes, with seconds and microseconds set to 0.
+    """
     # Round minutes to the nearest 15
     new_minute = (dt.minute // 15) * 15
     return dt.replace(minute=new_minute, second=0, microsecond=0)
@@ -42,10 +64,27 @@ def round_time(dt):
 
 # Function to format date in a specific format
 def format_date(dt):
+    """Formats a datetime object into a specific string representation.
+
+    Args:
+        dt (datetime): The datetime object to format.
+
+    Returns:
+        str: The formatted date string in 'dd-mmm-yyyy+HH%3AMM' format
+    """
     return dt.strftime("%d-%b-%Y").lower() + "+" + dt.strftime("%H%%3A%M")
 
 
 def carbon_api_forecast():
+    """
+    Fetches CO2 emission forecast data for a specified region within a 24-hour period starting from the nearest half-hour mark.
+
+    The function rounds down the current time to the nearest half-hour to align with data availability, sets the end time to the end of the current day, and then constructs and sends a request to the CO2 forecast API for the specified region. The response is processed into a pandas DataFrame, indexed by the effective time of each forecast.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing CO2 emission forecast data, indexed by effective time, or None if an error occurs.
+    """
+
     # data is availble every 30 minutes, so we need to start at the nearest half-hour
     def round_down_time(dt):
         # Round down to the nearest half-ho/ur
@@ -105,6 +144,14 @@ def carbon_api_forecast():
 
 
 def carbon_api_intensity():
+    """
+    Fetches and analyzes CO2 intensity data from the previous day, rounded to the nearest 15 minutes.
+
+    This function retrieves CO2 intensity data for the last 24 hours, processes the data to fill any gaps with interpolated values, and then calculates the mean, minimum, and maximum CO2 intensity values for the period.
+
+    Returns:
+        tuple: A tuple containing a dictionary with 'mean', 'min', and 'max' CO2 intensity values, and a pandas DataFrame with the recent CO2 intensity data indexed by effective time. Returns (None, None) in case of an error.
+    """
     try:
         # Current date and time, rounded to the nearest 15 minutes
         now = round_time(datetime.datetime.now())
@@ -158,6 +205,14 @@ def carbon_api_intensity():
 
 
 def fuel_mix():
+    """
+    Retrieves and processes the fuel mix data for the current time, rounded to the nearest 15 minutes, compared to the same time yesterday.
+
+    This function fetches the fuel mix data, maps raw field names to more descriptive names, calculates the percentage share of each fuel type in the total energy mix, and determines whether the region is net importing or exporting energy based on the fuel mix data.
+
+    Returns:
+        tuple: A tuple containing a pandas DataFrame with the fuel mix data, including the percentage share of each fuel type, and a string indicating if the region is 'importing' or 'exporting' energy. Returns (None, None) in case of an error.
+    """
     try:
         # Current date and time, rounded to the nearest 15 minutes
         now = round_time(datetime.datetime.now())
@@ -207,6 +262,17 @@ def fuel_mix():
 
 
 def classify_status(value, min_val, max_val):
+    """
+    Categorizes a numeric value as 'low', 'medium', or 'high' based on its comparison with provided minimum and maximum values.
+
+    Args:
+        value (float): The numeric value to categorize.
+        min_val (float): The minimum value of the range.
+        max_val (float): The maximum value of the range.
+
+    Returns:
+        str: A string indicating the category of the value: 'low' if the value is less than the min_val, 'high' if it is greater than the max_val, and 'medium' if it falls within the range inclusive of the min_val and max_val.
+    """
     if value < min_val:
         return "low"
     elif value > max_val:
@@ -216,6 +282,18 @@ def classify_status(value, min_val, max_val):
 
 
 def status_classification(df, co2_stats_prior_day):
+    """
+    Classifies each CO2 emission value in the dataframe based on its comparison to the prior day's statistics and predefined EU standards.
+
+    For each emission value, this function assigns a 'status_compared_to_yesterday' based on whether the value falls below, within, or above the range defined by the previous day's minimum and maximum CO2 values. It also assigns a 'status_compared_to_EU' based on a comparison to predefined minimum and maximum values representing EU standards.
+
+    Args:
+        df (pd.DataFrame): A DataFrame containing CO2 emission data with a column named 'Value'.
+        co2_stats_prior_day (dict): A dictionary containing 'min' and 'max' keys with float values representing the previous day's CO2 emission range.
+
+    Returns:
+        pd.DataFrame: The modified DataFrame with two new columns: 'status_compared_to_yesterday' and 'status_compared_to_EU', each containing classification results ('low', 'medium', 'high') for the CO2 values.
+    """
     df["status_compared_to_yesterday"] = df["Value"].apply(
         classify_status, args=(co2_stats_prior_day["min"], co2_stats_prior_day["max"])
     )
@@ -225,6 +303,15 @@ def status_classification(df, co2_stats_prior_day):
 
 
 def co2_int_plot(df_):
+    """
+    Plots CO2 intensity data with comparisons to the previous day, EU standards, and value intensity using a color-coded bar chart.
+
+    Args:
+        df_ (pd.DataFrame): A DataFrame containing CO2 intensity data, with columns for 'EffectiveTime', 'Value', 'status_compared_to_yesterday', and 'status_compared_to_EU'.
+
+    Returns:
+        matplotlib.pyplot: The plotted figure.
+    """
     # Assuming df_carbon_forecast_indexed is your DataFrame
     df = df_.reset_index(inplace=False)
     df["EffectiveTime"] = pd.to_datetime(df["EffectiveTime"])

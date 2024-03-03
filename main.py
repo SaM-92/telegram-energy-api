@@ -15,8 +15,10 @@ from subs.openai_script import *
 from subs.telegram_func import (
     telegram_carbon_intensity,
     telegram_fuel_mix,
+    telegram_personalised_handler,
 )
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
 
 # add vars to azure
 # Load environment variables from .env file
@@ -33,10 +35,23 @@ logger = logging.getLogger(__name__)
 # SELECT_OPTION = 0
 TIME_COLUMN_SELECTED = 1
 # FOLLOW_UP = 0
-SELECT_OPTION, FOLLOW_UP, FEEDBACK = range(3)
+SELECT_OPTION, FOLLOW_UP, FEEDBACK, ASK_PLAN, FOLLOW_UP_CONVERSATION = range(5)
 
 
 async def energy_api_func(update: Update, context: CallbackContext):
+    """
+    Processes user requests for energy-related information via a Telegram bot and replies with relevant data or status updates.
+
+    This asynchronous function handles user queries for carbon intensity or fuel mix information. Upon receiving a request, it acknowledges receipt and processes the request based on the user's selected option. It supports dynamic user interactions by maintaining state and offering follow-up actions.
+
+    Args:
+        update (Update): Contains the incoming update data, including the user's message and chat information.
+        context (CallbackContext): Holds context-specific data like user data for state management between interactions.
+
+    Returns:
+        This function sends messages directly to the Telegram chat.
+        Returns a status code indicating the next step in the conversation flow, such as FOLLOW_UP for continuing interaction.
+    """
 
     user_first_name = update.message.from_user.first_name
 
@@ -63,7 +78,14 @@ async def energy_api_func(update: Update, context: CallbackContext):
             f"Sorry {user_first_name}! 🤖 We are still working on this feature. Please try again later."
         )
 
-    options_keyboard = [["Start Over", "End Conversation", "Provide Feedback"]]
+    options_keyboard = [
+        [
+            "✨ Personalised Recommendations",
+            "🔄 Start Over",
+            "🔚 End Conversation",
+            "💬 Provide Feedback",
+        ]
+    ]
     reply_markup = ReplyKeyboardMarkup(options_keyboard, one_time_keyboard=True)
 
     await update.message.reply_text(
@@ -202,7 +224,7 @@ async def follow_up(update: Update, context: CallbackContext) -> int:
 
 async def feedback_command(update: Update, context: CallbackContext) -> int:
     logger.info("Entered feedback_command")
-    await update.message.reply_text("Please type your feedback.")
+    await update.message.reply_text("💬 Please type your feedback.")
     return FEEDBACK
 
 
@@ -218,6 +240,93 @@ async def feedback_text(update: Update, context: CallbackContext) -> int:
 
     await update.message.reply_text("Thank you for your feedback! ✨")
     return ConversationHandler.END
+
+
+async def personalised_recommendations_handler(
+    update: Update, context: CallbackContext
+) -> None:
+    # Prompt the user to specify their plans or devices they intend to use
+    await update.message.reply_text(
+        "🔌💡 Wondering about the best time for laundry to save energy? Just mention the device or ask me—like when to do laundry? I'm here to guide you! 🌿👕"
+    )
+    return ASK_PLAN
+
+
+async def planning_response_handler(update: Update, context: CallbackContext) -> int:
+    user_id = update.message.from_user.id
+    now = datetime.now()
+    # Initialize or update user query data
+    if "query_data" not in context.user_data:
+        context.user_data["query_data"] = {}
+    if user_id not in context.user_data["query_data"]:
+        context.user_data["query_data"][user_id] = {"count": 0, "last_query_time": now}
+
+    user_query_data = context.user_data["query_data"][user_id]
+    time_since_last_query = now - user_query_data["last_query_time"]
+
+    # Check if cooldown period has passed (3 hours)
+    if time_since_last_query > timedelta(hours=3):
+        # Reset query count after cooldown
+        user_query_data["count"] = 0
+        user_query_data["last_query_time"] = now
+    elif user_query_data["count"] >= 3:
+        # Calculate remaining cooldown time
+        remaining_cooldown = timedelta(hours=3) - time_since_last_query
+        remaining_minutes = int(remaining_cooldown.total_seconds() / 60)
+        # Inform user of cooldown and remaining time
+        await update.message.reply_text(
+            f"⌛️🚫 You have reached your query limit. Please wait for {remaining_minutes} minutes before trying again. ⏰🔒"
+        )
+        return ConversationHandler.END  # or your designated state for handling this
+
+    # Increment query count and update last query time
+    user_query_data["count"] += 1
+    user_query_data["last_query_time"] = now
+
+    # User's response to the planning question
+    user_query = update.message.text
+
+    # Check if there's an existing conversation context
+    if "conversation_context" not in context.user_data:
+        context.user_data["conversation_context"] = user_query
+
+    else:
+        # Append new question to existing context
+        context.user_data["conversation_context"] += f"\n{user_query}"
+
+    user_first_name = update.message.from_user.first_name
+    # Logic to process the user's response and provide recommendations
+    # Your recommendation logic here
+    AI_response_to_query = await telegram_personalised_handler(
+        update, context, user_first_name, context.user_data["conversation_context"]
+    )
+    if AI_response_to_query:
+        await update.message.reply_text(AI_response_to_query)
+    else:
+        # Provide a default message or handle the case as needed
+        await update.message.reply_text(
+            "I'm sorry, but I couldn't process your request. Please try again."
+        )
+
+    # Ask if they have any further questions
+    await update.message.reply_text("Any further questions (Y/N)?")
+
+    # Transition to another state or end the conversation
+    return FOLLOW_UP_CONVERSATION
+
+
+async def follow_up_handler(update: Update, context: CallbackContext) -> int:
+    user_response = update.message.text.lower()
+
+    if user_response in ["yes", "y"]:
+        # Prompt for the next question
+        await update.message.reply_text("🤔 What would you like to know next?")
+        return ASK_PLAN
+    else:
+        await update.message.reply_text(
+            "Thank you for using our service. Have a great day! 💚 🌎"
+        )
+        return ConversationHandler.END
 
 
 def main() -> None:
@@ -239,6 +348,10 @@ def main() -> None:
         entry_points=[
             CommandHandler("start", start),
             CommandHandler("energy_status", energy_status),
+            CommandHandler(
+                "personal_advice",
+                personalised_recommendations_handler,
+            ),
             CommandHandler("feedback", feedback_command),
             # MessageHandler(filters.Document.ALL, doc_handler),
         ],
@@ -247,13 +360,25 @@ def main() -> None:
                 MessageHandler(filters.TEXT & ~filters.COMMAND, energy_api_func)
             ],
             FOLLOW_UP: [
-                MessageHandler(filters.Regex("^(Start Over)$"), start_over_handler),
                 MessageHandler(
-                    filters.Regex("^(End Conversation)$"), end_conversation_handler
+                    filters.Regex("^✨ Personalised Recommendations$"),
+                    personalised_recommendations_handler,
                 ),
-                MessageHandler(filters.Regex("^(Provide Feedback)$"), follow_up),
+                MessageHandler(filters.Regex("^🔄 Start Over$"), start_over_handler),
+                MessageHandler(
+                    filters.Regex("^🔚 End Conversation$"), end_conversation_handler
+                ),
+                MessageHandler(filters.Regex("^💬 Provide Feedback$"), follow_up),
                 # Add a fallback handler within FOLLOW_UP for unexpected inputs
                 MessageHandler(filters.ALL, unexpected_input_handler),
+            ],
+            ASK_PLAN: [
+                MessageHandler(
+                    filters.TEXT & ~filters.COMMAND, planning_response_handler
+                )
+            ],
+            FOLLOW_UP_CONVERSATION: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, follow_up_handler)
             ],
             FEEDBACK: [MessageHandler(filters.TEXT & ~filters.COMMAND, feedback_text)],
         },
@@ -276,6 +401,9 @@ def main() -> None:
     application.add_handler(
         CommandHandler("cancel", cancel)
     )  # Directly handle cancel command
+    application.add_handler(
+        CommandHandler("personal_advice", personalised_recommendations_handler)
+    )
 
     application.run_polling()
 
