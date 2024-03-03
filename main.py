@@ -286,6 +286,9 @@ async def planning_response_handler(update: Update, context: CallbackContext) ->
     # User's response to the planning question
     user_query = update.message.text
 
+    await update.message.reply_text(
+        """🚀 We are now processing your request and we will get back to you shortly. \n ⏱️ It takes up to 10 seconds.. """
+    )
     # Check if there's an existing conversation context
     if "conversation_context" not in context.user_data:
         context.user_data["conversation_context"] = user_query
