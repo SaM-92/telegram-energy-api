@@ -284,6 +284,10 @@ def main() -> None:
         entry_points=[
             CommandHandler("start", start),
             CommandHandler("energy_status", energy_status),
+            CommandHandler(
+                "test",
+                personalised_recommendations_handler,
+            ),
             CommandHandler("feedback", feedback_command),
             # MessageHandler(filters.Document.ALL, doc_handler),
         ],
@@ -330,6 +334,9 @@ def main() -> None:
     application.add_handler(
         CommandHandler("cancel", cancel)
     )  # Directly handle cancel command
+    application.add_handler(
+        CommandHandler("test", personalised_recommendations_handler)
+    )
 
     application.run_polling()
 

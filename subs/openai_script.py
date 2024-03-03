@@ -236,7 +236,7 @@ def submit_energy_query_and_handle_response(carbon_data, user_query):
     structure = (
         "🌱 Carbon Intensity Periods Today: {carbon_data}\n"
         "🔋 Device Recommendation: Based on your query, here's the best time to use your device:\n"
-        "Show Categories ONLY as below if there is any in the dataset"
+        "Start with a summary of today's carbon intensity periods, using emojis to indicate low (🟢), medium (🟡), and high (🔴) emissions. If certain emission periods are not present in the dataset, omit them from the summary."
         "- 🟢 Low Carbon Period: Ideal time for high-energy consumption activities.\n"
         "- 🟡 Medium Carbon Period: Use discretion; consider delaying if possible.\n"
         "- 🔴 High Carbon Period: Avoid using energy-intensive devices if you can.\n"
