@@ -18,6 +18,7 @@ from subs.telegram_func import (
     telegram_personalised_handler,
 )
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
 
 # add vars to azure
 # Load environment variables from .env file
@@ -252,6 +253,36 @@ async def personalised_recommendations_handler(
 
 
 async def planning_response_handler(update: Update, context: CallbackContext) -> int:
+    user_id = update.message.from_user.id
+    now = datetime.now()
+    # Initialize or update user query data
+    if "query_data" not in context.user_data:
+        context.user_data["query_data"] = {}
+    if user_id not in context.user_data["query_data"]:
+        context.user_data["query_data"][user_id] = {"count": 0, "last_query_time": now}
+
+    user_query_data = context.user_data["query_data"][user_id]
+    time_since_last_query = now - user_query_data["last_query_time"]
+
+    # Check if cooldown period has passed (3 hours)
+    if time_since_last_query > timedelta(hours=3):
+        # Reset query count after cooldown
+        user_query_data["count"] = 0
+        user_query_data["last_query_time"] = now
+    elif user_query_data["count"] >= 3:
+        # Calculate remaining cooldown time
+        remaining_cooldown = timedelta(hours=3) - time_since_last_query
+        remaining_minutes = int(remaining_cooldown.total_seconds() / 60)
+        # Inform user of cooldown and remaining time
+        await update.message.reply_text(
+            f"⌛️🚫 You have reached your query limit. Please wait for {remaining_minutes} minutes before trying again. ⏰🔒"
+        )
+        return ConversationHandler.END  # or your designated state for handling this
+
+    # Increment query count and update last query time
+    user_query_data["count"] += 1
+    user_query_data["last_query_time"] = now
+
     # User's response to the planning question
     user_query = update.message.text
 
