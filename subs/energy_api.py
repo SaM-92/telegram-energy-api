@@ -575,6 +575,12 @@ def actual_demand_cal():
     return process_data_frame(demand_for_today)
 
 
+
+
+
+def wind_demand_analysis(demand,wind): 
+
+
 def area_plot_wind_demand(demand, wind):
     """Generates an area plot showing the contribution of wind power to the total energy demand.
 
@@ -625,7 +631,6 @@ def area_plot_wind_demand(demand, wind):
     )  # Setting custom x-ticks based on the correction
     plt.title("Demand vs Wind Energy Contribution")
     plt.ylabel("Power (MW)")
-    # plt.xlabel("Effective Time")
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
