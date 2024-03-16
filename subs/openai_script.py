@@ -393,6 +393,48 @@ def create_fuel_mix_prompt(date, fuel_mix_data, net_import_status):
     return prompt_text
 
 
+def create_wind_demand_prompt(demand_stats, wind_stats):
+    """
+    Generates a structured report summarizing the electricity demand and wind generation over the current day.
+
+    This function creates a report detailing the average, minimum, and maximum electricity demand and wind generation,
+    including the times those minimum and maximum values occurred. It highlights the contribution of wind generation to
+    meeting the electricity demand, emphasizing the dynamics of the power system from the start of the current day until now.
+
+    Args:
+        demand_stats (dict): A dictionary containing statistics (mean, min, max, time of min, time of max) for electricity demand.
+        wind_stats (dict): A dictionary containing statistics (mean, min, max, time of min, time of max) for wind generation.
+
+    Returns:
+        str: A formatted string that provides a comprehensive report on the electricity system's performance,
+             specifically focusing on demand and wind generation, with an emphasis on wind's contribution to the electricity demand.
+    """
+
+    prompt_text = (
+        "As of today, the performance of the electricity system is summarized as follows:\n\n"
+        "- ⚡ **Electricity Demand**: The average demand was {average_demand} MW, with a minimum of {min_demand} MW recorded at {time_min_demand} "
+        "and a maximum of {max_demand} MW observed at {time_max_demand}.\n"
+        "- 🌬️ **Wind Generation**: In terms of wind generation, the average output stood at {average_wind} MW. "
+        "The lowest generation reached {min_wind} MW at {time_min_wind}, while the peak generation was {max_wind} MW at {time_max_wind}.\n"
+        "- 💨 **Wind's Contribution**: On average, wind generation has contributed {wind_percentage}% of the total electricity demand.\n\n"
+        "This report highlights the power system's dynamics from the start of today until now, emphasizing the significant contribution of wind 🍃 to meeting the electricity demand."
+    ).format(
+        average_demand=round(demand_stats["Mean"], 2),
+        min_demand=round(demand_stats["Min"], 2),
+        time_min_demand=demand_stats["Time of Min"].strftime("%H:%M"),
+        max_demand=round(demand_stats["Max"], 2),
+        time_max_demand=demand_stats["Time of Max"].strftime("%H:%M"),
+        average_wind=round(wind_stats["Mean"], 2),
+        min_wind=round(wind_stats["Min"], 2),
+        time_min_wind=wind_stats["Time of Min"].strftime("%H:%M"),
+        max_wind=round(wind_stats["Max"], 2),
+        time_max_wind=wind_stats["Time of Max"].strftime("%H:%M"),
+        wind_percentage=round((wind_stats["Mean"] / demand_stats["Mean"]) * 100, 2),
+    )
+
+    return prompt_text
+
+
 def generate_voice(text):
     """
     Generates an audio file from the given text using a specified voice and model via an external API.

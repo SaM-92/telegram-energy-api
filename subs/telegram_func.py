@@ -307,4 +307,6 @@ async def telegram_wind_analysis(update, context, user_first_name):
         )
         return
     else:
+        demand_stats = calculate_stats_wind_demand(demand)
+        wind_stats = calculate_stats_wind_demand(wind)
         plot_demand_vs_wind = area_plot_wind_demand(demand, wind)
