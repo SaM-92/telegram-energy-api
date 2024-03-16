@@ -575,10 +575,32 @@ def actual_demand_cal():
     return process_data_frame(demand_for_today)
 
 
+def calculate_stats_wind_demand(df):
+    """
+    Calculate mean, min, and max of the 'Value' column in the DataFrame,
+    and identify the EffectiveTime for both min and max values.
 
+    Args:
+        df (pd.DataFrame): DataFrame with 'EffectiveTime' as index and a 'Value' column.
 
+    Returns:
+        dict: A dictionary with mean, min, max values, and the times at which min and max occurred.
+    """
+    mean_value = df["Value"].mean()
+    min_value = df["Value"].min()
+    max_value = df["Value"].max()
 
-def wind_demand_analysis(demand,wind): 
+    # Find the time at which the min and max values occurred
+    time_of_min = df["Value"].idxmin()
+    time_of_max = df["Value"].idxmax()
+
+    return {
+        "Mean": mean_value,
+        "Min": min_value,
+        "Time of Min": time_of_min,
+        "Max": max_value,
+        "Time of Max": time_of_max,
+    }
 
 
 def area_plot_wind_demand(demand, wind):
