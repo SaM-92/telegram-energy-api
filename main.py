@@ -16,7 +16,7 @@ from subs.telegram_func import (
     telegram_carbon_intensity,
     telegram_fuel_mix,
     telegram_personalised_handler,
-    telegram_wind_gen,
+    telegram_wind_analysis,
 )
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
@@ -75,7 +75,7 @@ async def energy_api_func(update: Update, context: CallbackContext):
     elif selected_option_user == "🔋 Fuel mix":
         await telegram_fuel_mix(update, context, user_first_name)
     elif selected_option_user == "🍃 Wind generation":
-        await telegram_wind_gen(update, context, user_first_name)
+        await telegram_wind_analysis(update, context, user_first_name)
 
     else:
         await update.message.reply_text(
