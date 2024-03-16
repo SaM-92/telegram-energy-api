@@ -484,3 +484,31 @@ def co2_plot_trend(df_):
 
     plt.tight_layout()  # Adjust layout to make room for plot elements
     return plt
+
+
+def wind_gen_cal():
+    """This function retrives the generated wind for today
+
+    Returns:
+        pandas.DataFrame: DataFrame containing wind generation data for today.
+            The DataFrame has the following columns:
+                - EffectiveTime: Timestamps representing the time of measurement.
+                - FieldName: Name of the wind generation field.
+                - Region: Region for which the wind generation is recorded (ROI/NI/ALL).
+                - Value: Wind generation values.
+    """
+
+    now = round_time(datetime.datetime.now())
+
+    # Start time of today
+    startDateTime = format_date(
+        datetime.datetime(now.year, now.month, now.day, 0, 0, 0)
+    )
+
+    # End time (current time, rounded to the nearest 15 minutes)
+    endDateTime = format_date(now)
+
+    # Retrive data for generated wind for today
+    wind_for_today = eirgrid_api("windactual", "ALL", startDateTime, endDateTime)
+
+    return wind_for_today
