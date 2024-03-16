@@ -573,3 +573,61 @@ def actual_demand_cal():
 
     # Return only the valid part of dataframe
     return process_data_frame(demand_for_today)
+
+
+def area_plot_wind_demand(demand, wind):
+    """Generates an area plot showing the contribution of wind power to the total energy demand.
+
+    Args:
+        demand (pd.DataFrame): DataFrame containing energy demand data. Expects a 'Value' column for demand values and a DateTimeIndex.
+        wind (pd.DataFrame): DataFrame containing wind energy production data. Expects a 'Value' column for wind production values and a DateTimeIndex.
+
+    Returns:
+        matplotlib.pyplot: A plot object showing the total energy demand and the contribution of wind energy over time. The x-axis represents time in 4-hour intervals, formatted as hours and minutes. The y-axis represents power in MW.
+    """
+    sns.set_style("darkgrid", {"axes.facecolor": ".9"})
+
+    # Align DataFrames based on index
+    combined = pd.DataFrame({"Demand": demand["Value"], "Wind": wind["Value"]})
+    # Correcting the interval calculation
+    combined_clean = combined.dropna()
+    # Calculate the number of entries that would constitute a 4-hour span, considering the data's time frequency
+    time_diff_in_hours = (
+        combined_clean.index[1] - combined_clean.index[0]
+    ).seconds / 3600
+    entries_per_hour = 1 / time_diff_in_hours
+    four_hourly_entries = int(entries_per_hour * 4)
+
+    # Ensure we have a positive, non-zero interval
+    four_hourly_entries = max(four_hourly_entries, 1)
+
+    # Adjust x-ticks and labels for 4-hour intervals
+    x_ticks = range(0, len(combined_clean), four_hourly_entries)
+    x_labels = [
+        time.strftime("%H:%M")
+        for i, time in enumerate(combined_clean.index)
+        if i % four_hourly_entries == 0
+    ]
+
+    x_axis = range(len(combined_clean))  # Use a simple numeric x-axis
+
+    # Plotting with the corrected interval
+    plt.figure(figsize=(10, 6))
+    plt.fill_between(
+        x_axis, combined_clean["Demand"], label="Total Demand", color="skyblue"
+    )
+    plt.fill_between(
+        x_axis, combined_clean["Wind"], label="Wind Contribution", color="lightgreen"
+    )
+
+    plt.xticks(
+        x_ticks, x_labels, rotation=45
+    )  # Setting custom x-ticks based on the correction
+    plt.title("Demand vs Wind Energy Contribution")
+    plt.ylabel("Power (MW)")
+    # plt.xlabel("Effective Time")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    # plt.show()
+    return plt
