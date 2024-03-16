@@ -293,4 +293,18 @@ async def telegram_fuel_mix(update, context, user_first_name):
         del audio_msg
         """
 
-async def telegram_wind_gen(update, context, user_first_name):
+
+async def telegram_wind_analysis(update, context, user_first_name):
+    wind = None
+    demand = None
+
+    wind = wind_gen_cal()
+    demand = actual_demand_cal()
+
+    if wind is None or demand is None:
+        await update.message.reply_html(
+            f"Sorry, {user_first_name} 😔. We're currently unable to retrieve the necessary data due to issues with the <a href='https://www.smartgriddashboard.com'>EirGrid website</a> 🌐. Please try again later. We appreciate your understanding 🙏."
+        )
+        return
+    else:
+        plot_demand_vs_wind = area_plot_wind_demand(demand, wind)
