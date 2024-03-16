@@ -391,8 +391,7 @@ def co2_int_plot(df_):
 
 
 def co2_plot_trend(df_):
-    """
-    Plots the trend of CO2 intensity over time along with categorized intensity levels.
+    """Plots the trend of CO2 intensity over time along with categorized intensity levels.
 
     This function takes a DataFrame containing CO2 emission data, including timestamps
     and values, and plots a trend line of emissions. It overlays this with a scatter
@@ -485,6 +484,25 @@ def co2_plot_trend(df_):
     plt.tight_layout()  # Adjust layout to make room for plot elements
     return plt
 
+def today_time():
+    """Generate start and end date and time strings for today's data reading.
+
+    Returns:
+        Tuple[str, str]: A tuple containing the start date and time string 
+        formatted as 'YYYY-MM-DD HH:MM:SS' and the end date and time string 
+        formatted as 'YYYY-MM-DD HH:MM:SS'.
+    """ 
+    now = round_time(datetime.datetime.now())
+
+    # Start time of today
+    startDateTime = format_date(
+        datetime.datetime(now.year, now.month, now.day, 0, 0, 0)
+    )
+
+    # End time (current time, rounded to the nearest 15 minutes)
+    endDateTime = format_date(now)
+
+    return startDateTime,endDateTime
 
 def wind_gen_cal():
     """This function retrives the generated wind for today
@@ -498,17 +516,10 @@ def wind_gen_cal():
                 - Value: Wind generation values.
     """
 
-    now = round_time(datetime.datetime.now())
-
-    # Start time of today
-    startDateTime = format_date(
-        datetime.datetime(now.year, now.month, now.day, 0, 0, 0)
-    )
-
-    # End time (current time, rounded to the nearest 15 minutes)
-    endDateTime = format_date(now)
-
     # Retrive data for generated wind for today
-    wind_for_today = eirgrid_api("windactual", "ALL", startDateTime, endDateTime)
+    wind_for_today = eirgrid_api("windactual", "ALL", today_time)
 
     return wind_for_today
+
+def actual_demand_cal():
+
