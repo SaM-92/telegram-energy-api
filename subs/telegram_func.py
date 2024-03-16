@@ -292,3 +292,5 @@ async def telegram_fuel_mix(update, context, user_first_name):
         )
         del audio_msg
         """
+
+async def telegram_wind_gen(update, context, user_first_name):

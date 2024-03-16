@@ -16,6 +16,7 @@ from subs.telegram_func import (
     telegram_carbon_intensity,
     telegram_fuel_mix,
     telegram_personalised_handler,
+    telegram_wind_gen,
 )
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
@@ -73,6 +74,9 @@ async def energy_api_func(update: Update, context: CallbackContext):
         await telegram_carbon_intensity(update, context, user_first_name)
     elif selected_option_user == "🔋 Fuel mix":
         await telegram_fuel_mix(update, context, user_first_name)
+    elif selected_option_user == "🍃 Wind generation":
+        await telegram_wind_gen(update, context, user_first_name)
+
     else:
         await update.message.reply_text(
             f"Sorry {user_first_name}! 🤖 We are still working on this feature. Please try again later."
@@ -101,7 +105,7 @@ async def energy_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     options = [
         "🌍 Carbon intensity",
         "🔋 Fuel mix",
-        # "💸 Price of electricity (wholesale market) [Under Development]",
+        "🍃 Wind generation",
     ]
 
     # Create a custom keyboard with the column names
