@@ -551,7 +551,8 @@ def wind_gen_cal():
     # Retrive data for generated wind for today
     wind_for_today = eirgrid_api("windactual", "ALL", startDateTime, endDateTime)
 
-    return wind_for_today
+    # Return only the valid part of dataframe
+    return process_data_frame(wind_for_today)
 
 
 def actual_demand_cal():
@@ -566,7 +567,9 @@ def actual_demand_cal():
                 - Value: Demand values.
     """
     startDateTime, endDateTime = today_time()
+
     # Retrive data for actual demand for today
     demand_for_today = eirgrid_api("demandactual", "ALL", startDateTime, endDateTime)
 
-    return demand_for_today
+    # Return only the valid part of dataframe
+    return process_data_frame(demand_for_today)
