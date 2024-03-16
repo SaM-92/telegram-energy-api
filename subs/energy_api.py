@@ -506,6 +506,35 @@ def today_time():
     return startDateTime, endDateTime
 
 
+def process_data_frame(data_frame):
+    """Process a DataFrame by converting timestamps, interpolating missing values,
+    and selecting recent data.
+
+    Args:
+        data_frame (pd.DataFrame): DataFrame containing data.
+
+    Returns:
+        pd.DataFrame: Processed DataFrame with timestamps converted,
+            missing values interpolated, and recent data selected.
+    """
+    # Convert 'EffectiveTime' to datetime and set as index
+    data_frame["EffectiveTime"] = pd.to_datetime(
+        data_frame["EffectiveTime"], format="%d-%b-%Y %H:%M:%S"
+    )
+    data_frame_indexed = data_frame.set_index("EffectiveTime")
+
+    # Find the last valid index
+    last_valid_index = data_frame_indexed["Value"].last_valid_index()
+
+    # Select rows up to the row before the last NaN
+    recent_data_frame = data_frame_indexed.loc[:last_valid_index]
+
+    # Interpolate missing values
+    recent_data_frame["Value"] = recent_data_frame["Value"].interpolate()
+
+    return recent_data_frame
+
+
 def wind_gen_cal():
     """This function retrives the generated wind for today
 
