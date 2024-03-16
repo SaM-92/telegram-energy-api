@@ -435,6 +435,19 @@ def create_wind_demand_prompt(demand_stats, wind_stats):
     return prompt_text
 
 
+def wind_and_demand_report(prompt):
+    """submit prompt for wind and demand analysis to gpt and get its response
+
+    Args:
+        prompt (str): Input prompt
+
+    Returns:
+        str : Generated text by gpt model
+    """
+    report = opt_gpt_summarise(prompt)
+    return report
+
+
 def generate_voice(text):
     """
     Generates an audio file from the given text using a specified voice and model via an external API.
