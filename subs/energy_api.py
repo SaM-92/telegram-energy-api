@@ -657,4 +657,5 @@ def area_plot_wind_demand(demand, wind):
     plt.grid(True)
     plt.tight_layout()
     # plt.show()
+
     return plt
