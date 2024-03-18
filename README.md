@@ -2,7 +2,7 @@
 
 ## Overview
 
-The CleanEnergyBot is a Telegram bot designed to empower users in Ireland with real-time insights into electricity usage, CO2 emissions forecasts, and energy-saving recommendations. Utilizing real-time data from EirGrid, the entity responsible for electricity delivery across Ireland, this bot leverages advanced data analysis techniques and the capabilities of GPT-3 to provide actionable energy usage insights. By comparing current CO2 emissions forecasts with previous data and EU standard rates, the CleanEnergyBot aims to assist users in making informed, environmentally friendly energy decisions.
+The CleanEnergyBot is a Telegram bot designed to empower users in Ireland with real-time insights into electricity usage, CO2 emissions forecasts, daily wind and demand trends, and energy-saving recommendations. Utilizing real-time data from EirGrid, the entity responsible for electricity delivery across Ireland, this bot leverages advanced data analysis techniques and the capabilities of GPT-3 to provide actionable energy usage insights. By comparing current CO2 emissions forecasts with previous data and EU standard rates, the CleanEnergyBot aims to assist users in making informed, environmentally friendly energy decisions.
 
 ![Real-time Data Scraping Diagram](/images/overview.png)
 
@@ -20,6 +20,7 @@ The CleanEnergyBot is a Telegram bot designed to empower users in Ireland with r
 - **CO2 Emissions Forecasts**: Offers forecasts of CO2 emissions, enabling users to compare current data with past performance and EU standards.
 - **Energy Saving Recommendations**: Delivers tailored advice on the most efficient times for energy usage, helping users reduce their carbon footprint.
 - **Fuel Mix Insights**: Delivers detailed information on the current mix of fuel sources powering the electricity grid, including renewables, gas, coal, and other sources. This feature helps users understand the environmental impact of their electricity consumption and the role of renewable energy in the grid.
+- **Daily Demand Trend and Wind Contribution**:Delivers a visual journey through the day's demand fluctuations, witnessing how wind power steps up to meet electricity demand peaks and valleys.
 - **Text-to-Speech for Energy Saving Tips**: Utilising the ElevenLabs API, the bot now sends energy-saving tips as voice messages, making it easier and more convenient for users to receive and listen to advice on the go.
 - **Interactive User Conversations**: Users can now have detailed conversations with the bot, asking for energy advice and receiving personalized recommendations. A query limit of 3 per 3 hours is in place to manage API costs effectively.
 - **User Interaction**: Supports various commands for users to start conversations, receive energy status updates, give feedback, and more.
