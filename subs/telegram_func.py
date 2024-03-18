@@ -298,7 +298,7 @@ async def send_plot_wind_demand(update, context, area_plot_wind_demand):
 
     # Save the plot to a BytesIO buffer
     buf = BytesIO()
-    area_plot_wind_demand.savefig(buf, format="png")
+    area_plot_wind_demand.savefig(buf, format="png", dpi=300)
     buf.seek(0)
     area_plot_wind_demand.close()  # Make sure to close the plot to free up memory
     caption_text = "📉 Today's Energy in Ireland: See how wind power helps meet our electricity needs throughout the day. A simple look at our journey towards greener energy."
@@ -325,6 +325,5 @@ async def telegram_wind_analysis(update, context, user_first_name):
         prompt_for_wind_demand = create_wind_demand_prompt(demand_stats, wind_stats)
         wind_demand_summary = wind_and_demand_report(prompt_for_wind_demand)
         plot_demand_vs_wind = area_plot_wind_demand(demand, wind)
-        await update.message.reply_text(wind_demand_summary)
-        print(wind_demand_summary)
         await send_plot_wind_demand(update, context, plot_demand_vs_wind)
+        # await update.message.reply_text(wind_demand_summary)
