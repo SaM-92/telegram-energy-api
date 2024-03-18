@@ -613,6 +613,9 @@ def area_plot_wind_demand(demand, wind):
     Returns:
         matplotlib.pyplot: A plot object showing the total energy demand and the contribution of wind energy over time. The x-axis represents time in 4-hour intervals, formatted as hours and minutes. The y-axis represents power in MW.
     """
+    # Plotting with the corrected interval
+    plt.figure(figsize=(7, 5))
+
     sns.set_style("darkgrid", {"axes.facecolor": ".9"})
 
     # Align DataFrames based on index
@@ -639,8 +642,6 @@ def area_plot_wind_demand(demand, wind):
 
     x_axis = range(len(combined_clean))  # Use a simple numeric x-axis
 
-    # Plotting with the corrected interval
-    plt.figure(figsize=(10, 6))
     plt.fill_between(
         x_axis, combined_clean["Demand"], label="Total Demand", color="skyblue"
     )

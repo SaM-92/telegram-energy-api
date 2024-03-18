@@ -326,4 +326,5 @@ async def telegram_wind_analysis(update, context, user_first_name):
         wind_demand_summary = wind_and_demand_report(prompt_for_wind_demand)
         plot_demand_vs_wind = area_plot_wind_demand(demand, wind)
         await update.message.reply_text(wind_demand_summary)
-        await send_plot_wind_demand(update, context, area_plot_wind_demand)
+        print(wind_demand_summary)
+        await send_plot_wind_demand(update, context, plot_demand_vs_wind)
