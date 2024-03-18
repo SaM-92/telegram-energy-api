@@ -615,30 +615,40 @@ def generate_xaxis_ticks(start, end, interval_hours):
     Returns:
         list: A list of `pd.Timestamp` objects representing the tick marks.
     """
-    tick_marks = [start]
-    current_tick = start
+    tick_marks = []
+    current_tick = start.replace(minute=0, second=0, microsecond=0)
     while current_tick <= end:
-        current_tick += pd.Timedelta(hours=interval_hours)
         tick_marks.append(current_tick)
-    # Ensure the end time is included, adjusting the last tick if necessary
-    if tick_marks[-1] > end:
+        current_tick += pd.Timedelta(hours=interval_hours)
+
+    # Ensure the last tick does not exceed the current time
+    if tick_marks and tick_marks[-1] > end:
+        tick_marks.pop()  # Remove the last tick if it's past the end time
+
+    # Ensure the end time is included if it's close to the last tick
+    if (
+        tick_marks
+        and (end - tick_marks[-1]).total_seconds() / 3600 < interval_hours / 2
+    ):
         tick_marks[-1] = end
+    elif end not in tick_marks:
+        tick_marks.append(end)  # Append the end time as the last tick
+
     return tick_marks
 
 
 def area_plot_wind_demand(demand, wind):
-    """Generates an area plot with dynamic x-axis intervals based on the data span,
-    ensuring the x-axis ticks start from the data start point and end with the data endpoint,
-    divided into rational intervals.
+    """Generates an area plot with dynamic x-axis intervals based on the data span, ensuring the x-axis ticks
+    are rounded to the nearest hour and include today's date in the title.
 
     Args:
         demand (pd.DataFrame): DataFrame containing energy demand data with a DateTimeIndex.
         wind (pd.DataFrame): DataFrame containing wind energy production data with a DateTimeIndex.
 
     Returns:
-        matplotlib.pyplot: A plot object showing total energy demand and wind energy contribution over time with dynamically adjusted x-axis intervals.
+        matplotlib.pyplot: A plot object showing total energy demand and wind energy contribution over time with
+        dynamically adjusted x-axis intervals and today's date in the title.
     """
-    # Increase font size
     plt.rcParams.update({"font.size": 14})
 
     plt.figure(figsize=(10, 6))
@@ -649,21 +659,18 @@ def area_plot_wind_demand(demand, wind):
     start_time = combined.index.min()
     end_time = combined.index.max()
 
-    # Calculate the total duration in hours to determine the interval
     duration_hours = (end_time - start_time).total_seconds() / 3600
     if duration_hours <= 2:
-        interval_hours = 0.5  # 30 minutes
+        interval_hours = 0.5
     elif duration_hours <= 12:
-        interval_hours = 3  # Every 3 hours
+        interval_hours = 3
     elif duration_hours <= 24:
-        interval_hours = 4  # Every 4 hours
+        interval_hours = 4
     else:
-        interval_hours = 6  # Every 6 hours
+        interval_hours = 6
 
-    # Generate x-axis ticks
     ticks = generate_xaxis_ticks(start_time, end_time, interval_hours)
 
-    # Adding fill_between with edgecolor and linewidth
     plt.fill_between(
         combined.index,
         combined["Demand"],
@@ -681,13 +688,12 @@ def area_plot_wind_demand(demand, wind):
         linewidth=1.5,
     )
 
-    # Set the formatter for x-axis
     plt.gca().xaxis.set_major_formatter(DateFormatter("%H:%M"))
-
-    # Set custom ticks
     plt.xticks(ticks, rotation=45)
 
-    plt.title("Demand vs Wind Energy Contribution")
+    # Include today's date in the title
+    today_date = datetime.datetime.now().strftime("%Y-%m-%d")
+    plt.title(f"Demand vs Wind Energy Contribution - {today_date}")
     plt.ylabel("Power (MW)")
     plt.legend()
     plt.grid(True)
