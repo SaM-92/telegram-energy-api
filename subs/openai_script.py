@@ -395,19 +395,19 @@ def create_fuel_mix_prompt(date, fuel_mix_data, net_import_status):
 
 def create_wind_demand_prompt(demand_stats, wind_stats):
     """
-    Generates a structured report summarizing the electricity demand and wind generation over the current day.
+    Generate a summary report of electricity demand and wind generation for the current day.
 
-    This function creates a report detailing the average, minimum, and maximum electricity demand and wind generation,
-    including the times those minimum and maximum values occurred. It highlights the contribution of wind generation to
-    meeting the electricity demand, emphasizing the dynamics of the power system from the start of the current day until now.
+    This function compiles a structured report that outlines key statistics about electricity demand and wind generation,
+    including average, minimum, and maximum values, along with the timestamps of these extreme values. It emphasizes the
+    proportion of electricity demand met by wind generation, reflecting on the dynamic nature of the power system throughout the day.
 
-    Args:
-        demand_stats (dict): A dictionary containing statistics (mean, min, max, time of min, time of max) for electricity demand.
-        wind_stats (dict): A dictionary containing statistics (mean, min, max, time of min, time of max) for wind generation.
+    Parameters:
+        demand_stats (dict): Statistics on electricity demand, including 'Mean', 'Min', 'Max', and their corresponding timestamps.
+        wind_stats (dict): Statistics on wind generation, including 'Mean', 'Min', 'Max', and their corresponding timestamps.
 
     Returns:
-        str: A formatted string that provides a comprehensive report on the electricity system's performance,
-             specifically focusing on demand and wind generation, with an emphasis on wind's contribution to the electricity demand.
+        str: A string formatted to convey the day's electricity system performance, focusing on demand and wind generation,
+             and highlighting the role of wind in fulfilling electricity needs.
     """
 
     prompt_data = {
@@ -426,9 +426,9 @@ def create_wind_demand_prompt(demand_stats, wind_stats):
 
     prompt_template = (
         "As of today, the performance of the electricity system is summarized as follows:\n\n"
-        "- ⚡ **Electricity Demand**: "
-        "- 🌬️ **Wind Generation**: "
-        "- 💨 **Wind's Contribution**: "
+        "- ⚡Electricity Demand: "
+        "- 🌬️Wind Generation: "
+        "- 💨Wind's Contribution: "
         "This report highlights the power system's dynamics from the start of today until now, emphasizing the significant contribution of wind 🍃 to meeting the electricity demand."
     )
 
