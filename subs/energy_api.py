@@ -638,6 +638,9 @@ def area_plot_wind_demand(demand, wind):
     Returns:
         matplotlib.pyplot: A plot object showing total energy demand and wind energy contribution over time with dynamically adjusted x-axis intervals.
     """
+    # Increase font size
+    plt.rcParams.update({"font.size": 14})
+
     plt.figure(figsize=(10, 6))
     sns.set_style("darkgrid", {"axes.facecolor": ".9"})
 
@@ -660,11 +663,22 @@ def area_plot_wind_demand(demand, wind):
     # Generate x-axis ticks
     ticks = generate_xaxis_ticks(start_time, end_time, interval_hours)
 
+    # Adding fill_between with edgecolor and linewidth
     plt.fill_between(
-        combined.index, combined["Demand"], label="Total Demand", color="skyblue"
+        combined.index,
+        combined["Demand"],
+        label="Total Demand",
+        color="skyblue",
+        edgecolor="blue",
+        linewidth=1.5,
     )
     plt.fill_between(
-        combined.index, combined["Wind"], label="Wind Contribution", color="lightgreen"
+        combined.index,
+        combined["Wind"],
+        label="Wind Contribution",
+        color="lightgreen",
+        edgecolor="green",
+        linewidth=1.5,
     )
 
     # Set the formatter for x-axis
