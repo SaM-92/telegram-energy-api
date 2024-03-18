@@ -410,27 +410,31 @@ def create_wind_demand_prompt(demand_stats, wind_stats):
              specifically focusing on demand and wind generation, with an emphasis on wind's contribution to the electricity demand.
     """
 
-    prompt_text = (
+    prompt_data = {
+        "average_demand": round(demand_stats["Mean"], 2),
+        "min_demand": round(demand_stats["Min"], 2),
+        "time_min_demand": demand_stats["Time of Min"].strftime("%H:%M"),
+        "max_demand": round(demand_stats["Max"], 2),
+        "time_max_demand": demand_stats["Time of Max"].strftime("%H:%M"),
+        "average_wind": round(wind_stats["Mean"], 2),
+        "min_wind": round(wind_stats["Min"], 2),
+        "time_min_wind": wind_stats["Time of Min"].strftime("%H:%M"),
+        "max_wind": round(wind_stats["Max"], 2),
+        "time_max_wind": wind_stats["Time of Max"].strftime("%H:%M"),
+        "wind_percentage": round((wind_stats["Mean"] / demand_stats["Mean"]) * 100, 2),
+    }
+
+    prompt_template = (
         "As of today, the performance of the electricity system is summarized as follows:\n\n"
-        "- ⚡ **Electricity Demand**: The average demand was {average_demand} MW, with a minimum of {min_demand} MW recorded at {time_min_demand} "
-        "and a maximum of {max_demand} MW observed at {time_max_demand}.\n"
-        "- 🌬️ **Wind Generation**: In terms of wind generation, the average output stood at {average_wind} MW. "
-        "The lowest generation reached {min_wind} MW at {time_min_wind}, while the peak generation was {max_wind} MW at {time_max_wind}.\n"
-        "- 💨 **Wind's Contribution**: On average, wind generation has contributed {wind_percentage}% of the total electricity demand.\n\n"
+        "- ⚡ **Electricity Demand**: "
+        "- 🌬️ **Wind Generation**: "
+        "- 💨 **Wind's Contribution**: "
         "This report highlights the power system's dynamics from the start of today until now, emphasizing the significant contribution of wind 🍃 to meeting the electricity demand."
-    ).format(
-        average_demand=round(demand_stats["Mean"], 2),
-        min_demand=round(demand_stats["Min"], 2),
-        time_min_demand=demand_stats["Time of Min"].strftime("%H:%M"),
-        max_demand=round(demand_stats["Max"], 2),
-        time_max_demand=demand_stats["Time of Max"].strftime("%H:%M"),
-        average_wind=round(wind_stats["Mean"], 2),
-        min_wind=round(wind_stats["Min"], 2),
-        time_min_wind=wind_stats["Time of Min"].strftime("%H:%M"),
-        max_wind=round(wind_stats["Max"], 2),
-        time_max_wind=wind_stats["Time of Max"].strftime("%H:%M"),
-        wind_percentage=round((wind_stats["Mean"] / demand_stats["Mean"]) * 100, 2),
     )
+
+    prompt_text = (
+        "Write a short report using plain English based on the prompt template: {prompt_template} \n and provided data: {input_data}"
+    ).format(prompt_template=prompt_template, input_data=prompt_data)
 
     return prompt_text
 
