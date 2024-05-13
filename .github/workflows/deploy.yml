@@ -1,4 +1,4 @@
-name: CI/CD to Heroku with Docker
+name: CI/CD to Heroku
 
 on:
   push:
@@ -13,20 +13,19 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
 
-      - name: Login to Heroku Container Registry
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: echo $HEROKU_API_KEY | docker login --username=_ --password-stdin registry.heroku.com
-
-      - name: Build and push Docker image
+      - name: Install dependencies
         run: |
-          docker buildx build --platform linux/amd64 --push -t registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web .
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Release the Docker image
+      - name: Deploy to Heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
-          heroku container:release web -a ${{ secrets.HEROKU_APP_NAME }}
+          heroku git:remote -a ${{ secrets.HEROKU_APP_NAME }}
+          git push heroku main
